@@ -1,26 +1,57 @@
 @import "tailwindcss";
+@config "../../tailwind.config.js";
+
+@theme {
+  --color-cyber-blue: #0088FF;
+  --color-cyber-blue-light: #33A9FF;
+  --color-bg-main: #030712;
+  --color-card-bg: #0B1120;
+  --color-card-border: #1E293B;
+  --color-text-muted: #94A3B8;
+
+  --background-image-blue-gradient: linear-gradient(to right, #0088FF, #33A9FF);
+
+  --font-sans: var(--font-inter), sans-serif;
+  --font-mono: var(--font-fira-code), monospace;
+
+  --shadow-neon-blue: 0 0 15px rgba(0, 136, 255, 0.4), 0 0 30px rgba(0, 136, 255, 0.2);
+}
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: #030712;
+  --foreground: #ffffff;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+}
+
+/* Custom Cyberpunk / Sleek Scrollbar for entire site */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #030712;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1E293B;
+  border-radius: 9999px;
+  border: 1px solid rgba(0, 136, 255, 0.15);
+  transition: all 0.2s ease-in-out;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #0088FF;
+  box-shadow: 0 0 10px rgba(0, 136, 255, 0.5);
+}
+
+/* Firefox standard scrollbar support */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #1E293B #030712;
 }
