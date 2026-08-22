@@ -1,4 +1,7 @@
-import React from "react";
+"use client";
+
+import Image from "next/image";
+import React, { useState } from "react";
 import { BoardMember } from "@/data/boardData";
 
 interface BoardCardProps {
@@ -7,45 +10,61 @@ interface BoardCardProps {
 }
 
 export default function BoardCard({ member, isLarge = false }: BoardCardProps) {
+  const [imageError, setImageError] = useState(false);
+
   return (
     <div className="rounded-xl border border-[#1E293B] bg-[#0B1120] hover:border-[#0088FF] p-4 sm:p-5 flex flex-col justify-between transition-all duration-300 hover:shadow-[0_0_25px_rgba(0,136,255,0.25)] group relative overflow-hidden">
       {/* Top Image Section with strict portrait aspect ratio */}
       <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden border border-[#1E293B] bg-[#121826] flex items-center justify-center group-hover:border-cyber-blue/40 transition-colors">
         {/* Technical CSS Grid Overlay */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#1E293B25_1px,transparent_1px),linear-gradient(to_bottom,#1E293B25_1px,transparent_1px)] bg-[size:1rem_1rem] pointer-events-none" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,136,255,0.08)_0%,transparent_70%)] pointer-events-none" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#1E293B25_1px,transparent_1px),linear-gradient(to_bottom,#1E293B25_1px,transparent_1px)] bg-[size:1rem_1rem] pointer-events-none z-10 opacity-60" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,136,255,0.1)_0%,transparent_70%)] pointer-events-none z-10" />
 
         {/* Top-Left: Glowing Status Dot */}
-        <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5 bg-[#030712]/80 backdrop-blur-md px-2 py-1 rounded-md border border-[#1E293B]">
+        <div className="absolute top-3 left-3 z-20 flex items-center gap-1.5 bg-[#030712]/80 backdrop-blur-md px-2 py-1 rounded-md border border-[#1E293B]">
           <span className="w-1.5 h-1.5 rounded-full bg-[#0088FF] shadow-[0_0_8px_#0088FF] animate-pulse" />
           <span className="text-[9px] font-mono text-slate-400 font-semibold tracking-wider">ACTIVE</span>
         </div>
 
         {/* Top-Right: ID Tag */}
-        <div className="absolute top-3 right-3 z-10 bg-[#030712]/80 backdrop-blur-md px-2 py-1 rounded-md border border-[#1E293B] text-[10px] font-mono text-cyber-blue-light font-bold">
+        <div className="absolute top-3 right-3 z-20 bg-[#030712]/80 backdrop-blur-md px-2 py-1 rounded-md border border-[#1E293B] text-[10px] font-mono text-cyber-blue-light font-bold">
           {member.id}
         </div>
 
-        {/* Center Technical Blueprint Avatar Graphic */}
-        <div className="relative flex flex-col items-center justify-center gap-2 select-none opacity-40 group-hover:opacity-75 transition-opacity duration-300">
-          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border border-dashed border-cyber-blue/50 flex items-center justify-center text-cyber-blue">
-            <svg className="w-8 h-8 sm:w-10 sm:h-10 text-cyber-blue/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-              />
-            </svg>
+        {/* Board Member Image or Fallback */}
+        {member.imageUrl && !imageError ? (
+          <Image
+            src={member.imageUrl}
+            alt={member.name}
+            fill
+            sizes="(max-width: 768px) 100vw, 400px"
+            className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
+            onError={() => setImageError(true)}
+          />
+        ) : (
+          <div className="relative flex flex-col items-center justify-center gap-2 select-none opacity-40 group-hover:opacity-75 transition-opacity duration-300">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border border-dashed border-cyber-blue/50 flex items-center justify-center text-cyber-blue">
+              <svg className="w-8 h-8 sm:w-10 sm:h-10 text-cyber-blue/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                />
+              </svg>
+            </div>
+            <span className="font-mono text-[10px] text-slate-400 tracking-widest uppercase">
+              // OPERATOR ID
+            </span>
           </div>
-          <span className="font-mono text-[10px] text-slate-400 tracking-widest uppercase">
-            // OPERATOR ID
-          </span>
-        </div>
+        )}
+
+        {/* Vignette & Gradient Overlay for readability */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0B1120] via-transparent to-transparent opacity-80 pointer-events-none z-10" />
 
         {/* Bottom Corner Accent Lines */}
-        <div className="absolute bottom-2 left-2 w-3 h-3 border-b border-l border-cyber-blue/30" />
-        <div className="absolute bottom-2 right-2 w-3 h-3 border-b border-r border-cyber-blue/30" />
+        <div className="absolute bottom-2 left-2 w-3 h-3 border-b border-l border-cyber-blue/50 z-20" />
+        <div className="absolute bottom-2 right-2 w-3 h-3 border-b border-r border-cyber-blue/50 z-20" />
       </div>
 
       {/* Bottom Text Section */}
