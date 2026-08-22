@@ -3,6 +3,8 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import CoreLeadership from "@/components/board/CoreLeadership";
 import DomainHeadsCarousel from "@/components/board/DomainHeadsCarousel";
+import BoardHeroGraphic from "@/components/board/BoardHeroGraphic";
+import PageHero from "@/components/ui/PageHero";
 
 export const metadata = {
   title: "Board of Directors | WhiteHats",
@@ -19,22 +21,15 @@ export default function BoardPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col gap-12 lg:gap-14 pt-6 pb-12">
         <Navbar />
 
-        {/* Page Hero Header */}
-        <div className="flex flex-col items-center text-center gap-3 pt-4">
-          <div className="font-mono text-xs text-cyber-blue tracking-widest uppercase">
-            // WHITEHATS DIRECTORY
-          </div>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black font-mono tracking-tight uppercase">
-            <span className="text-slate-100">&lt; THE EXECUTIVE</span>{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyber-blue via-cyber-blue-light to-blue-300 drop-shadow-[0_0_25px_rgba(0,136,255,0.45)]">
-              BOARD /&gt;
-            </span>
-          </h1>
-          <div className="w-12 h-1 bg-cyber-blue/80 rounded-full my-1" />
-          <p className="text-text-muted text-sm sm:text-base max-w-xl">
-            Meet the core leadership and domain specialists commanding research, offensive security operations, infrastructure, and community directives.
-          </p>
-        </div>
+        {/* Board Page Hero matching Home page header structure */}
+        <PageHero
+          label="// WHITEHATS DIRECTORY"
+          headingPrefix="< THE EXECUTIVE"
+          headingSuffix="BOARD />"
+          description="Meet the core leadership and domain specialists commanding research, offensive security operations, infrastructure, and community directives."
+          variant="cipher"
+          rightSlot={<BoardHeroGraphic />}
+        />
 
         {/* Board Sections */}
         <CoreLeadership />
