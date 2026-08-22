@@ -28,6 +28,13 @@ body {
   font-family: var(--font-sans);
 }
 
+/* Hide default cursor on desktop devices capable of hover */
+@media (hover: hover) and (pointer: fine) {
+  *, *::before, *::after {
+    cursor: none !important;
+  }
+}
+
 /* Custom Cyberpunk / Sleek Scrollbar for entire site */
 ::-webkit-scrollbar {
   width: 6px;

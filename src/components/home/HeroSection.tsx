@@ -1,6 +1,10 @@
+"use client";
+
 import { HERO_DATA, SOCIAL_LINKS, SocialLink } from "@/data/homeData";
 import React from "react";
 import TerminalGraphic from "./TerminalGraphic";
+import MagneticButton from "@/components/ui/MagneticButton";
+import CipherReveal from "@/components/ui/CipherReveal";
 
 function renderSocialIcon(iconType: SocialLink["iconType"]) {
   switch (iconType) {
@@ -43,14 +47,15 @@ export default function HeroSection() {
       {/* Left Column */}
       <div className="lg:col-span-6 flex flex-col items-start gap-5">
         <div className="font-mono text-xs text-cyber-blue tracking-widest uppercase">
-          {HERO_DATA.comment}
+          <CipherReveal text={HERO_DATA.comment} duration={350} />
         </div>
 
         <h1 className="text-4xl sm:text-5xl xl:text-6xl font-black font-mono tracking-tight leading-none">
-          <span className="text-slate-100">{HERO_DATA.headingPrefix}</span>
-          <br />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyber-blue via-cyber-blue-light to-blue-300 drop-shadow-[0_0_25px_rgba(0,136,255,0.45)]">
-            {HERO_DATA.headingSuffix}
+          <span className="text-slate-100 block">
+            <CipherReveal text={HERO_DATA.headingPrefix} delay={100} duration={400} />
+          </span>
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyber-blue via-cyber-blue-light to-blue-300 drop-shadow-[0_0_25px_rgba(0,136,255,0.45)] block">
+            <CipherReveal text={HERO_DATA.headingSuffix} delay={250} duration={450} />
           </span>
         </h1>
 
@@ -61,18 +66,23 @@ export default function HeroSection() {
         </p>
 
         <div className="flex flex-wrap items-center gap-4 pt-2">
-          <a
-            href={HERO_DATA.primaryCta.href}
-            className="px-6 py-3 rounded bg-cyber-blue hover:bg-cyber-blue-light text-black font-mono font-bold text-xs tracking-wider uppercase transition-all shadow-neon-blue hover:shadow-[0_0_25px_rgba(0,136,255,0.6)] flex items-center gap-2"
-          >
-            <span>{HERO_DATA.primaryCta.text}</span>
-          </a>
-          <a
-            href={HERO_DATA.secondaryCta.href}
-            className="px-6 py-3 rounded border border-card-border hover:border-cyber-blue/60 bg-card-bg/80 hover:bg-card-bg text-slate-200 hover:text-white font-mono font-semibold text-xs tracking-wider uppercase transition-all"
-          >
-            {HERO_DATA.secondaryCta.text}
-          </a>
+          <MagneticButton strength={14}>
+            <a
+              href={HERO_DATA.primaryCta.href}
+              className="px-6 py-3 rounded bg-cyber-blue hover:bg-cyber-blue-light text-black font-mono font-bold text-xs tracking-wider uppercase transition-all shadow-neon-blue hover:shadow-[0_0_25px_rgba(0,136,255,0.6)] flex items-center gap-2 cursor-pointer"
+            >
+              <span>{HERO_DATA.primaryCta.text}</span>
+            </a>
+          </MagneticButton>
+
+          <MagneticButton strength={10}>
+            <a
+              href={HERO_DATA.secondaryCta.href}
+              className="px-6 py-3 rounded border border-card-border hover:border-cyber-blue/60 bg-card-bg/80 hover:bg-card-bg text-slate-200 hover:text-white font-mono font-semibold text-xs tracking-wider uppercase transition-all cursor-pointer"
+            >
+              {HERO_DATA.secondaryCta.text}
+            </a>
+          </MagneticButton>
         </div>
 
         {/* Social Icons */}
@@ -86,7 +96,7 @@ export default function HeroSection() {
                 key={link.name}
                 href={link.href}
                 aria-label={link.name}
-                className="hover:text-cyber-blue transition-colors"
+                className="hover:text-cyber-blue transition-colors cursor-pointer"
               >
                 {renderSocialIcon(link.iconType)}
               </a>

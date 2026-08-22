@@ -2,6 +2,8 @@
 
 import { motion, useInView, Variants } from "framer-motion";
 import React, { useRef } from "react";
+import CipherReveal from "@/components/ui/CipherReveal";
+import MagneticButton from "@/components/ui/MagneticButton";
 
 interface PageHeroProps {
   /** The small monospace label shown above the heading e.g. "// PROJECTS" */
@@ -40,113 +42,6 @@ const CHILDREN_VARIANTS: Variants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.4, delay: 0.7, ease: "easeOut" } },
 };
 
-// --- Glitch Heading (Projects) ---
-function GlitchHeading({ prefix, suffix }: { prefix: string; suffix: string }) {
-  return (
-    <motion.h1
-      className="text-4xl sm:text-5xl xl:text-6xl font-black font-mono tracking-tight leading-none"
-      initial={{ opacity: 0, x: -30 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.6, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
-    >
-      <motion.span
-        className="text-slate-100 inline-block"
-        animate={{ x: [0, -2, 1, -1, 0], opacity: [1, 0.8, 1, 0.9, 1] }}
-        transition={{ duration: 0.08, delay: 0.7, times: [0, 0.25, 0.5, 0.75, 1] }}
-      >
-        {prefix}
-      </motion.span>
-      <br />
-      <motion.span
-        className="text-transparent bg-clip-text bg-gradient-to-r from-cyber-blue via-cyber-blue-light to-blue-300 drop-shadow-[0_0_25px_rgba(0,136,255,0.45)] inline-block"
-        initial={{ opacity: 0, filter: "blur(8px)" }}
-        animate={{ opacity: 1, filter: "blur(0px)" }}
-        transition={{ duration: 0.7, delay: 0.35, ease: "easeOut" }}
-      >
-        {suffix}
-      </motion.span>
-    </motion.h1>
-  );
-}
-
-// --- Typewriter Heading (Events) ---
-function TypewriterHeading({ prefix, suffix }: { prefix: string; suffix: string }) {
-  return (
-    <h1 className="text-4xl sm:text-5xl xl:text-6xl font-black font-mono tracking-tight leading-none">
-      <motion.span
-        className="text-slate-100 inline-block"
-        initial={{ clipPath: "inset(0 100% 0 0)" }}
-        animate={{ clipPath: "inset(0 0% 0 0)" }}
-        transition={{ duration: 0.6, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
-      >
-        {prefix}
-      </motion.span>
-      <br />
-      <motion.span
-        className="text-transparent bg-clip-text bg-gradient-to-r from-cyber-blue via-cyber-blue-light to-blue-300 drop-shadow-[0_0_25px_rgba(0,136,255,0.45)] inline-block"
-        initial={{ clipPath: "inset(0 100% 0 0)" }}
-        animate={{ clipPath: "inset(0 0% 0 0)" }}
-        transition={{ duration: 0.7, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
-      >
-        {suffix}
-      </motion.span>
-    </h1>
-  );
-}
-
-// --- Cipher Heading (Board) ---
-function CipherHeading({ prefix, suffix }: { prefix: string; suffix: string }) {
-  return (
-    <h1 className="text-4xl sm:text-5xl xl:text-6xl font-black font-mono tracking-tight leading-none">
-      <motion.span
-        className="text-slate-100 inline-block whitespace-nowrap"
-        initial={{ opacity: 0, y: 10, filter: "blur(6px)" }}
-        animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-        transition={{ duration: 0.6, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
-      >
-        {prefix}
-      </motion.span>
-      <br />
-      <motion.span
-        className="text-transparent bg-clip-text bg-gradient-to-r from-cyber-blue via-cyber-blue-light to-blue-300 drop-shadow-[0_0_25px_rgba(0,136,255,0.45)] inline-block whitespace-nowrap"
-        initial={{ opacity: 0, y: 10, filter: "blur(6px)" }}
-        animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-        transition={{ duration: 0.6, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
-      >
-        {suffix}
-      </motion.span>
-    </h1>
-  );
-}
-
-// --- Slide Up Heading (Gallery) ---
-function SlideUpHeading({ prefix, suffix }: { prefix: string; suffix: string }) {
-  return (
-    <h1 className="text-4xl sm:text-5xl xl:text-6xl font-black font-mono tracking-tight leading-none">
-      <div className="overflow-hidden">
-        <motion.span
-          className="text-slate-100 inline-block whitespace-nowrap"
-          initial={{ y: "110%" }}
-          animate={{ y: 0 }}
-          transition={{ duration: 0.55, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-        >
-          {prefix}
-        </motion.span>
-      </div>
-      <div className="overflow-hidden">
-        <motion.span
-          className="text-transparent bg-clip-text bg-gradient-to-r from-cyber-blue via-cyber-blue-light to-blue-300 drop-shadow-[0_0_25px_rgba(0,136,255,0.45)] inline-block whitespace-nowrap"
-          initial={{ y: "110%" }}
-          animate={{ y: 0 }}
-          transition={{ duration: 0.55, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
-        >
-          {suffix}
-        </motion.span>
-      </div>
-    </h1>
-  );
-}
-
 // Default right-column HUD if no custom rightSlot provided
 function DefaultHUD() {
   return (
@@ -181,23 +76,9 @@ export default function PageHero({
   description,
   children,
   rightSlot,
-  variant = "glitch",
 }: PageHeroProps) {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-40px" });
-
-  function renderHeading() {
-    switch (variant) {
-      case "glitch":
-        return <GlitchHeading prefix={headingPrefix} suffix={headingSuffix} />;
-      case "typewriter":
-        return <TypewriterHeading prefix={headingPrefix} suffix={headingSuffix} />;
-      case "cipher":
-        return <CipherHeading prefix={headingPrefix} suffix={headingSuffix} />;
-      case "slide-up":
-        return <SlideUpHeading prefix={headingPrefix} suffix={headingSuffix} />;
-    }
-  }
 
   return (
     <section
@@ -206,18 +87,25 @@ export default function PageHero({
     >
       {/* Left Column: Heading & Description (Matches Home Page proportions) */}
       <div className="lg:col-span-6 flex flex-col items-start gap-5">
-        {/* Monospace Sub-label */}
+        {/* Monospace Sub-label with CipherReveal */}
         <motion.div
           className="font-mono text-xs text-cyber-blue tracking-widest uppercase"
           variants={LABEL_VARIANTS}
           initial="hidden"
           animate={isInView ? "visible" : "hidden"}
         >
-          {label}
+          <CipherReveal text={label} duration={350} />
         </motion.div>
 
-        {/* Animated Heading */}
-        {renderHeading()}
+        {/* Animated Main Heading with Decryption Scramble */}
+        <h1 className="text-4xl sm:text-5xl xl:text-6xl font-black font-mono tracking-tight leading-none">
+          <span className="text-slate-100 block">
+            <CipherReveal text={headingPrefix} delay={100} duration={400} />
+          </span>
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyber-blue via-cyber-blue-light to-blue-300 drop-shadow-[0_0_25px_rgba(0,136,255,0.45)] block">
+            <CipherReveal text={headingSuffix} delay={250} duration={450} />
+          </span>
+        </h1>
 
         {/* Accent Bar */}
         <motion.div
@@ -237,7 +125,7 @@ export default function PageHero({
           {description}
         </motion.p>
 
-        {/* Optional Action / CTA Slot */}
+        {/* Optional Action / CTA Slot with Magnetic Pull */}
         {children && (
           <motion.div
             className="pt-2"
@@ -245,7 +133,7 @@ export default function PageHero({
             initial="hidden"
             animate={isInView ? "visible" : "hidden"}
           >
-            {children}
+            <MagneticButton strength={12}>{children}</MagneticButton>
           </motion.div>
         )}
       </div>

@@ -4,6 +4,7 @@ import React, { useRef, useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GalleryItem } from "@/data/galleryData";
 import GalleryCard from "./GalleryCard";
+import MagneticButton from "@/components/ui/MagneticButton";
 
 interface HorizontalMasonryProps {
   items: GalleryItem[];
@@ -187,23 +188,27 @@ export default function HorizontalMasonry({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
         {/* Left / Right Fast Scroll Buttons */}
         <div className="flex items-center gap-2">
-          <button
-            onClick={scrollLeft}
-            aria-label="Scroll gallery left"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0B1120] hover:bg-cyber-blue/20 text-slate-300 hover:text-white border border-[#1E293B] hover:border-cyber-blue font-mono text-xs transition-colors cursor-pointer"
-          >
-            <span>←</span>
-            <span className="hidden sm:inline">PREV</span>
-          </button>
+          <MagneticButton strength={10}>
+            <button
+              onClick={scrollLeft}
+              aria-label="Scroll gallery left"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0B1120] hover:bg-cyber-blue/20 text-slate-300 hover:text-white border border-[#1E293B] hover:border-cyber-blue font-mono text-xs transition-colors cursor-pointer"
+            >
+              <span>←</span>
+              <span className="hidden sm:inline">PREV</span>
+            </button>
+          </MagneticButton>
 
-          <button
-            onClick={scrollRight}
-            aria-label="Scroll gallery right"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0B1120] hover:bg-cyber-blue/20 text-slate-300 hover:text-white border border-[#1E293B] hover:border-cyber-blue font-mono text-xs transition-colors cursor-pointer"
-          >
-            <span className="hidden sm:inline">NEXT</span>
-            <span>→</span>
-          </button>
+          <MagneticButton strength={10}>
+            <button
+              onClick={scrollRight}
+              aria-label="Scroll gallery right"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0B1120] hover:bg-cyber-blue/20 text-slate-300 hover:text-white border border-[#1E293B] hover:border-cyber-blue font-mono text-xs transition-colors cursor-pointer"
+            >
+              <span className="hidden sm:inline">NEXT</span>
+              <span>→</span>
+            </button>
+          </MagneticButton>
         </div>
 
         {/* Center Interactive Trackbar (Clickable to scrub) */}

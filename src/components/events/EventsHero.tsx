@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { IMPACT_STATS } from "@/data/eventsData";
+import MagneticButton from "@/components/ui/MagneticButton";
+import CipherReveal from "@/components/ui/CipherReveal";
 
 export default function EventsHero() {
   const [typedCommand, setTypedCommand] = useState("");
@@ -36,37 +38,21 @@ export default function EventsHero() {
 
   return (
     <section className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center pt-2">
-      {/* Left Column: Heading, Subtitle & CTA (Identical structure and typography to Home Page) */}
+      {/* Left Column: Heading, Subtitle & CTA */}
       <div className="lg:col-span-6 flex flex-col items-start gap-5">
         {/* Monospace Sub-label */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-          className="font-mono text-xs text-cyber-blue tracking-widest uppercase"
-        >
-          // EVENTS &amp; TACTICAL OPERATIONS
-        </motion.div>
+        <div className="font-mono text-xs text-cyber-blue tracking-widest uppercase">
+          <CipherReveal text="// EVENTS & TACTICAL OPERATIONS" duration={350} />
+        </div>
 
         {/* Animated Main Heading */}
         <h1 className="text-4xl sm:text-5xl xl:text-6xl font-black font-mono tracking-tight leading-none">
-          <motion.span
-            className="text-slate-100 inline-block"
-            initial={{ clipPath: "inset(0 100% 0 0)" }}
-            animate={{ clipPath: "inset(0 0% 0 0)" }}
-            transition={{ duration: 0.6, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
-          >
-            &lt; OUR
-          </motion.span>
-          <br />
-          <motion.span
-            className="text-transparent bg-clip-text bg-gradient-to-r from-cyber-blue via-cyber-blue-light to-blue-300 drop-shadow-[0_0_25px_rgba(0,136,255,0.45)] inline-block"
-            initial={{ clipPath: "inset(0 100% 0 0)" }}
-            animate={{ clipPath: "inset(0 0% 0 0)" }}
-            transition={{ duration: 0.7, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
-          >
-            EVENTS /&gt;
-          </motion.span>
+          <span className="text-slate-100 block">
+            <CipherReveal text="< OUR" delay={100} duration={350} />
+          </span>
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyber-blue via-cyber-blue-light to-blue-300 drop-shadow-[0_0_25px_rgba(0,136,255,0.45)] block">
+            <CipherReveal text="EVENTS />" delay={250} duration={400} />
+          </span>
         </h1>
 
         {/* Accent Bar */}
@@ -94,15 +80,17 @@ export default function EventsHero() {
           transition={{ duration: 0.4, delay: 0.7, ease: "easeOut" }}
           className="pt-2"
         >
-          <button
-            onClick={scrollToPastEvents}
-            className="px-6 py-3 rounded bg-cyber-blue hover:bg-cyber-blue-light text-black font-mono font-bold text-xs tracking-wider uppercase transition-all shadow-neon-blue hover:shadow-[0_0_25px_rgba(0,136,255,0.6)] flex items-center gap-2 cursor-pointer"
-          >
-            <span>Explore Past Events</span>
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-            </svg>
-          </button>
+          <MagneticButton strength={14}>
+            <button
+              onClick={scrollToPastEvents}
+              className="px-6 py-3 rounded bg-cyber-blue hover:bg-cyber-blue-light text-black font-mono font-bold text-xs tracking-wider uppercase transition-all shadow-neon-blue hover:shadow-[0_0_25px_rgba(0,136,255,0.6)] flex items-center gap-2 cursor-pointer"
+            >
+              <span>Explore Past Events</span>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+              </svg>
+            </button>
+          </MagneticButton>
         </motion.div>
       </div>
 
@@ -114,8 +102,8 @@ export default function EventsHero() {
         className="lg:col-span-6 flex flex-col gap-4"
       >
         {/* Tactical Terminal Window */}
-        <div className="rounded-xl border border-[#1E293B] bg-[#050A15] shadow-2xl overflow-hidden font-mono">
-          <div className="flex items-center justify-between px-4 py-2.5 bg-[#030712] border-b border-[#1E293B] text-xs text-slate-400">
+        <div className="rounded-xl border border-card-border bg-[#050A15] shadow-2xl overflow-hidden font-mono">
+          <div className="flex items-center justify-between px-4 py-2.5 bg-[#030712] border-b border-card-border text-xs text-slate-400">
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
               <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/80" />
@@ -156,8 +144,8 @@ export default function EventsHero() {
         </div>
 
         {/* Community Impact Stats Block */}
-        <div className="rounded-xl border border-[#1E293B] bg-[#0B1120]/90 p-4 sm:p-5 flex flex-col gap-3 shadow-xl">
-          <div className="flex items-center justify-between border-b border-[#1E293B] pb-2">
+        <div className="rounded-xl border border-card-border bg-[#0B1120]/90 p-4 sm:p-5 flex flex-col gap-3 shadow-xl">
+          <div className="flex items-center justify-between border-b border-card-border pb-2">
             <span className="font-mono text-[11px] font-bold text-cyber-blue-light tracking-widest uppercase">
               // COMMUNITY IMPACT
             </span>
@@ -171,7 +159,7 @@ export default function EventsHero() {
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 + idx * 0.15, duration: 0.4 }}
-                className="flex flex-col gap-0.5 text-center p-2 rounded-lg bg-[#030712] border border-[#1E293B]"
+                className="flex flex-col gap-0.5 text-center p-2 rounded-lg bg-[#030712] border border-card-border"
               >
                 <span className="font-mono text-lg sm:text-xl font-black text-white">
                   {stat.value}

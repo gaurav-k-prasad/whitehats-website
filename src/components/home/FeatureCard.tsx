@@ -1,5 +1,10 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
+import { motion } from "framer-motion";
 import { FeatureCardData } from "@/data/homeData";
+import CyberCardBorder from "@/components/ui/CyberCardBorder";
+import ScanlineOverlay from "@/components/ui/ScanlineOverlay";
 
 interface FeatureCardProps {
   card: FeatureCardData;
@@ -35,62 +40,74 @@ function renderCardIcon(iconType: FeatureCardData["iconType"]) {
 }
 
 export default function FeatureCard({ card }: FeatureCardProps) {
+  const [isHovered, setIsHovered] = useState(false);
+
   return (
-    <div className="rounded-xl border border-card-border bg-card-bg p-6 flex flex-col justify-between hover:border-cyber-blue/60 transition-all duration-300 group shadow-lg">
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <div className="w-9 h-9 rounded-lg bg-black/50 border border-card-border flex items-center justify-center group-hover:border-cyber-blue/60 transition-colors">
-            {renderCardIcon(card.iconType)}
+    <motion.div
+      whileHover={{ y: -5 }}
+      transition={{ duration: 0.25, ease: "easeOut" }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className="h-full"
+    >
+      <CyberCardBorder isHovered={isHovered} className="h-full group shadow-xl" contentClassName="p-6 flex flex-col justify-between h-full">
+        <ScanlineOverlay opacity="opacity-[0.03]" />
+
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-9 h-9 rounded-lg bg-black/60 border border-card-border flex items-center justify-center group-hover:border-cyber-blue group-hover:shadow-[0_0_12px_rgba(0,136,255,0.35)] transition-all">
+              {renderCardIcon(card.iconType)}
+            </div>
+            <span className="font-mono text-xs text-text-muted/60 font-semibold tracking-wider">
+              {card.badgeNumber}
+            </span>
           </div>
-          <span className="font-mono text-xs text-text-muted/60 font-semibold">
-            {card.badgeNumber}
-          </span>
+
+          <h2 className="font-mono font-bold text-sm tracking-wider text-white group-hover:text-cyber-blue-light transition-colors mb-2">
+            {card.title}
+          </h2>
+
+          {card.description && (
+            <p className="text-text-muted text-xs leading-relaxed mb-3">
+              {card.description}
+            </p>
+          )}
+
+          {card.events && (
+            <ul className="space-y-2 text-[11px] font-mono mb-3">
+              {card.events.map((event) => (
+                <li key={event.title} className="flex items-center justify-between text-text-muted">
+                  <span className="truncate">{event.title}</span>
+                  <span className="text-cyber-blue font-medium ml-2 whitespace-nowrap">
+                    {event.date}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {card.tools && (
+            <div className="flex flex-wrap gap-1.5 mb-3">
+              {card.tools.map((tool) => (
+                <span
+                  key={tool}
+                  className="px-2 py-0.5 rounded bg-black/60 border border-card-border text-cyber-blue font-mono text-[10px] tracking-wider"
+                >
+                  {tool}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
 
-        <h2 className="font-mono font-bold text-sm tracking-wider text-white mb-2">
-          {card.title}
-        </h2>
-
-        {card.description && (
-          <p className="text-text-muted text-xs leading-relaxed mb-3">
-            {card.description}
-          </p>
-        )}
-
-        {card.events && (
-          <ul className="space-y-2 text-[11px] font-mono mb-3">
-            {card.events.map((event) => (
-              <li key={event.title} className="flex items-center justify-between text-text-muted">
-                <span className="truncate">{event.title}</span>
-                <span className="text-cyber-blue font-medium ml-2 whitespace-nowrap">
-                  {event.date}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-
-        {card.tools && (
-          <div className="flex flex-wrap gap-1.5 mb-3">
-            {card.tools.map((tool) => (
-              <span
-                key={tool}
-                className="px-2 py-0.5 rounded bg-black/50 border border-card-border text-cyber-blue font-mono text-[10px] tracking-wider"
-              >
-                {tool}
-              </span>
-            ))}
-          </div>
-        )}
-      </div>
-
-      <a
-        href={card.ctaHref}
-        className="mt-6 font-mono text-xs font-semibold text-text-muted group-hover:text-cyber-blue flex items-center gap-1 transition-colors"
-      >
-        <span>{card.ctaText}</span>
-        <span className="transition-transform group-hover:translate-x-1">&rarr;</span>
-      </a>
-    </div>
+        <a
+          href={card.ctaHref}
+          className="mt-6 font-mono text-xs font-semibold text-text-muted group-hover:text-cyber-blue flex items-center gap-1 transition-colors"
+        >
+          <span>{card.ctaText}</span>
+          <span className="transition-transform group-hover:translate-x-1.5">&rarr;</span>
+        </a>
+      </CyberCardBorder>
+    </motion.div>
   );
 }

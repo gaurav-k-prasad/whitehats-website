@@ -5,12 +5,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { useState } from "react";
+import { motion } from "framer-motion";
+import MagneticButton from "@/components/ui/MagneticButton";
 
 function formatNavLabel(label: string) {
   if (label.startsWith(">_")) {
     return (
       <span className="inline-flex items-center">
-        <span className="mr-1">&gt;_</span>
+        <span className="mr-1 text-cyber-blue">&gt;_</span>
         <span>{label.replace(">_", "").trim()}</span>
       </span>
     );
@@ -18,7 +20,7 @@ function formatNavLabel(label: string) {
   if (label.startsWith("/")) {
     return (
       <span className="inline-flex items-center">
-        <span className="mr-1">/</span>
+        <span className="mr-1 text-cyber-blue">/</span>
         <span>{label.replace("/", "").trim()}</span>
       </span>
     );
@@ -55,8 +57,8 @@ export default function Navbar() {
           </div>
         </Link>
 
-        {/* Desktop Center Navigation Links */}
-        <nav className="hidden lg:flex items-center gap-6 text-xs font-mono font-medium">
+        {/* Desktop Center Navigation Links with Framer Motion Sliding Underline */}
+        <nav className="hidden lg:flex items-center gap-6 text-xs font-mono font-medium relative">
           {NAV_ITEMS.map((item) => {
             const isActive =
               pathname === item.href ||
@@ -66,13 +68,20 @@ export default function Navbar() {
               <Link
                 key={item.label}
                 href={item.href}
-                className={
+                className={`relative py-1 transition-colors ${
                   isActive
-                    ? "text-cyber-blue hover:text-cyber-blue-light transition-colors relative py-1 border-b-2 border-cyber-blue"
-                    : "text-text-muted hover:text-slate-200 transition-colors py-1"
-                }
+                    ? "text-cyber-blue font-bold"
+                    : "text-text-muted hover:text-slate-200"
+                }`}
               >
                 {formatNavLabel(item.label)}
+                {isActive && (
+                  <motion.div
+                    layoutId="activeNavUnderline"
+                    className="absolute -bottom-1 left-0 right-0 h-[2px] bg-cyber-blue shadow-[0_0_8px_#0088FF]"
+                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                  />
+                )}
               </Link>
             );
           })}
@@ -80,21 +89,23 @@ export default function Navbar() {
 
         {/* Right CTA Button & Mobile Menu Toggle */}
         <div className="flex items-center gap-3">
-          <a
-            href="/contact"
-            className="hidden sm:flex items-center gap-2 px-4 sm:px-5 py-2 rounded border border-cyber-blue/80 bg-cyber-blue/10 hover:bg-cyber-blue/20 hover:border-cyber-blue text-cyber-blue hover:text-white font-mono text-xs font-semibold tracking-wider transition-all duration-200 shadow-neon-blue"
-          >
-            <span>&gt;_ JOIN US</span>
-            <svg
-              className="w-3.5 h-3.5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2.5}
+          <MagneticButton strength={12}>
+            <a
+              href="/contact"
+              className="hidden sm:flex items-center gap-2 px-4 sm:px-5 py-2 rounded border border-cyber-blue/80 bg-cyber-blue/10 hover:bg-cyber-blue/20 hover:border-cyber-blue text-cyber-blue hover:text-white font-mono text-xs font-semibold tracking-wider transition-all duration-200 shadow-neon-blue cursor-pointer"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-            </svg>
-          </a>
+              <span>&gt;_ JOIN US</span>
+              <svg
+                className="w-3.5 h-3.5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2.5}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </a>
+          </MagneticButton>
 
           {/* Mobile Hamburger Toggle Button */}
           <button
@@ -144,7 +155,7 @@ export default function Navbar() {
 
           <div className="pt-2 border-t border-card-border/60 mt-1 sm:hidden">
             <a
-              href="#"
+              href="/contact"
               onClick={() => setMobileMenuOpen(false)}
               className="w-full flex items-center justify-center gap-2 py-2.5 rounded border border-cyber-blue/80 bg-cyber-blue/15 text-cyber-blue font-mono text-xs font-bold tracking-wider shadow-neon-blue"
             >

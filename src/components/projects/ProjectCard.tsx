@@ -1,5 +1,11 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
+import { motion } from "framer-motion";
 import { ProjectRepository, ProjectStatus } from "@/data/projectsData";
+import CyberCardBorder from "@/components/ui/CyberCardBorder";
+import ScanlineOverlay from "@/components/ui/ScanlineOverlay";
+import MagneticButton from "@/components/ui/MagneticButton";
 
 interface ProjectCardProps {
   project: ProjectRepository;
@@ -102,82 +108,94 @@ function renderStatusBadge(status: ProjectStatus) {
 }
 
 export default function ProjectCard({ project }: ProjectCardProps) {
+  const [isHovered, setIsHovered] = useState(false);
+
   return (
-    <div className="rounded-xl border border-[#1E293B] hover:border-[#0088FF] bg-[#0B1120] p-6 flex flex-col justify-between transition-all duration-300 hover:shadow-[0_0_25px_rgba(0,136,255,0.15)] group">
-      <div className="flex flex-col gap-4">
-        {/* Card Header: Icon container, Title, Visibility & Status Badge (Top-Aligned with Title) */}
-        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
-          <div className="flex items-start gap-3.5">
-            <div className="w-12 h-12 rounded-lg bg-[#030712] border border-[#1E293B] group-hover:border-cyber-blue/50 flex items-center justify-center shrink-0 transition-colors shadow-[0_0_12px_rgba(0,136,255,0.1)]">
-              {renderProjectIcon(project.iconType)}
+    <motion.div
+      whileHover={{ y: -5 }}
+      transition={{ duration: 0.25, ease: "easeOut" }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className="h-full"
+    >
+      <CyberCardBorder isHovered={isHovered} className="h-full group shadow-xl" contentClassName="p-6 flex flex-col justify-between h-full">
+        <ScanlineOverlay opacity="opacity-[0.03]" />
+
+        <div className="flex flex-col gap-4">
+          {/* Card Header */}
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+            <div className="flex items-start gap-3.5">
+              <div className="w-12 h-12 rounded-lg bg-[#030712] border border-card-border group-hover:border-cyber-blue/60 flex items-center justify-center shrink-0 transition-colors shadow-[0_0_12px_rgba(0,136,255,0.1)]">
+                {renderProjectIcon(project.iconType)}
+              </div>
+              <div className="flex flex-col">
+                <h3 className="font-mono font-bold text-lg text-white group-hover:text-cyber-blue-light transition-colors leading-tight">
+                  {project.name}
+                </h3>
+                <span className="font-mono text-[11px] text-slate-400 mt-1">
+                  {project.visibility} Repository
+                </span>
+              </div>
             </div>
-            <div className="flex flex-col">
-              <h3 className="font-mono font-bold text-lg text-white group-hover:text-cyber-blue-light transition-colors leading-tight">
-                {project.name}
-              </h3>
-              <span className="font-mono text-[11px] text-slate-400 mt-1">
-                {project.visibility} Repository
+
+            <div className="self-start">
+              {renderStatusBadge(project.status)}
+            </div>
+          </div>
+
+          {/* Card Body */}
+          <p className="text-[#94A3B8] text-xs sm:text-sm leading-relaxed">
+            {project.description}
+          </p>
+
+          {/* Tech Stack Badges */}
+          <div className="flex flex-wrap gap-1.5 pt-1">
+            {project.techStack.map((tech) => (
+              <span
+                key={tech}
+                className="px-2.5 py-1 rounded bg-[#030712] border border-card-border text-slate-300 font-mono text-[11px] font-medium"
+              >
+                {tech}
               </span>
-            </div>
-          </div>
-
-          <div className="self-start">
-            {renderStatusBadge(project.status)}
+            ))}
           </div>
         </div>
 
-        {/* Card Body: Description */}
-        <p className="text-[#94A3B8] text-xs sm:text-sm leading-relaxed">
-          {project.description}
-        </p>
+        {/* Card Footer */}
+        <div className="flex items-center justify-between pt-5 mt-5 border-t border-[#1E293B]/70">
+          <div className="flex items-center gap-2 text-xs font-mono text-[#94A3B8]">
+            <svg className="w-4 h-4 text-cyber-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1.75}
+                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+              />
+            </svg>
+            <span>{project.contributors} Contributors</span>
+          </div>
 
-        {/* Tech Stack Badges */}
-        <div className="flex flex-wrap gap-1.5 pt-1">
-          {project.techStack.map((tech) => (
-            <span
-              key={tech}
-              className="px-2.5 py-1 rounded bg-[#030712] border border-[#1E293B] text-slate-300 font-mono text-[11px] font-medium"
+          <MagneticButton strength={12}>
+            <a
+              href={project.githubUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-card-border hover:border-cyber-blue/60 bg-[#030712] hover:bg-cyber-blue/15 text-slate-200 hover:text-white font-mono text-xs font-semibold tracking-wider transition-all cursor-pointer shadow-sm"
             >
-              {tech}
-            </span>
-          ))}
+              <span>View on GitHub</span>
+              <svg
+                className="w-3.5 h-3.5 text-cyber-blue"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M7 17L17 7M17 7H7M17 7V17" />
+              </svg>
+            </a>
+          </MagneticButton>
         </div>
-      </div>
-
-      {/* Card Footer: Contributors & View on GitHub */}
-      <div className="flex items-center justify-between pt-5 mt-5 border-t border-[#1E293B]/70">
-        {/* Contributor Count */}
-        <div className="flex items-center gap-2 text-xs font-mono text-[#94A3B8]">
-          <svg className="w-4 h-4 text-cyber-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={1.75}
-              d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-            />
-          </svg>
-          <span>{project.contributors} Contributors</span>
-        </div>
-
-        {/* View on GitHub Button */}
-        <a
-          href={project.githubUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#1E293B] hover:border-cyber-blue/60 bg-[#030712] hover:bg-cyber-blue/15 text-slate-200 hover:text-white font-mono text-xs font-semibold tracking-wider transition-all cursor-pointer"
-        >
-          <span>View on GitHub</span>
-          <svg
-            className="w-3.5 h-3.5 text-cyber-blue"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M7 17L17 7M17 7H7M17 7V17" />
-          </svg>
-        </a>
-      </div>
-    </div>
+      </CyberCardBorder>
+    </motion.div>
   );
 }

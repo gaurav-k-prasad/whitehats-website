@@ -2,8 +2,9 @@
 
 import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { EVENTS_DATA, ClubEvent } from "@/data/eventsData";
+import { EVENTS_DATA } from "@/data/eventsData";
 import EventCard from "./EventCard";
+import CipherReveal from "@/components/ui/CipherReveal";
 
 type EventFilterType = "All" | "CTF" | "Workshop" | "Seminar" | "Bootcamp";
 
@@ -27,11 +28,11 @@ export default function EventsGrid() {
     <section id="past-events" className="w-full flex flex-col gap-6 pt-4">
       {/* Header Bar: Title & Tactical Filter Pills */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-card-border pb-4">
-        {/* Left: Title & Count */}
+        {/* Left: Title & Count with CipherReveal */}
         <div className="flex items-center gap-3">
           <div className="w-2.5 h-2.5 rounded-full bg-cyber-blue shadow-neon-blue animate-pulse" />
           <h2 className="text-xl sm:text-2xl font-black font-mono tracking-wider uppercase text-white">
-            // PAST EVENTS
+            <CipherReveal text="// PAST EVENTS" duration={400} />
           </h2>
           <span className="font-mono text-xs text-slate-500 px-2 py-0.5 rounded bg-[#0B1120] border border-[#1E293B]">
             {filteredEvents.length} RECORDS
