@@ -168,6 +168,7 @@ export default function TerminalGraphic() {
             src="/logo.png"
             alt="WhiteHats Logo Watermark"
             fill
+            sizes="288px"
             className="object-contain"
             priority
           />

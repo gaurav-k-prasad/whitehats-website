@@ -55,3 +55,35 @@ body {
   scrollbar-width: thin;
   scrollbar-color: #1E293B #030712;
 }
+
+/* Cyber Glitch Reveal Keyframes */
+@keyframes cyberGlitchIn {
+  0% {
+    opacity: 0;
+    transform: translateY(40px) scale(0.95);
+    filter: blur(10px);
+    clip-path: polygon(0 20%, 100% 20%, 100% 45%, 0 45%);
+  }
+  25% {
+    opacity: 0.6;
+    transform: translateY(-3px) skewX(2deg);
+    filter: blur(3px);
+    clip-path: polygon(0 60%, 100% 60%, 100% 85%, 0 85%);
+  }
+  50% {
+    opacity: 0.85;
+    transform: translateY(2px) skewX(-1.5deg);
+    filter: blur(1px);
+    clip-path: polygon(0 5%, 100% 5%, 100% 95%, 0 95%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) skewX(0deg) scale(1);
+    filter: blur(0px);
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  }
+}
+
+.animate-glitch-reveal {
+  animation: cyberGlitchIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

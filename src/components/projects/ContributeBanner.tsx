@@ -1,5 +1,3 @@
-import React from "react";
-
 export default function ContributeBanner() {
   return (
     <section className="rounded-xl border border-[#1E293B] bg-[#0B1120] p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 relative overflow-hidden group shadow-xl">
@@ -23,7 +21,7 @@ export default function ContributeBanner() {
 
       {/* Right Button */}
       <a
-        href="https://github.com/whitehats-vit"
+        href="https://github.com/TheWhitehatsclub-vit"
         target="_blank"
         rel="noopener noreferrer"
         className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-cyber-blue/80 bg-cyber-blue/15 hover:bg-cyber-blue text-cyber-blue hover:text-black font-mono text-xs font-bold tracking-wider uppercase transition-all duration-200 shadow-neon-blue shrink-0 z-10"

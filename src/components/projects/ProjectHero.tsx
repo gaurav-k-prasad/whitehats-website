@@ -25,7 +25,7 @@ export default function ProjectHero() {
 
         <div className="pt-2">
           <a
-            href="https://github.com/whitehats-vit"
+            href="https://github.com/TheWhitehatsclub-vit"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2.5 px-5 py-3 rounded-lg border border-card-border hover:border-cyber-blue/70 bg-card-bg/90 hover:bg-card-bg text-slate-100 hover:text-white font-mono text-xs font-semibold tracking-wider uppercase transition-all duration-200 shadow-lg hover:shadow-[0_0_20px_rgba(0,136,255,0.25)]"

@@ -1,35 +1,20 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import dynamic from "next/dynamic";
-import {
-  GALLERY_ITEMS,
-  GalleryFilterState,
-} from "@/data/galleryData";
-import CommandFilter from "./CommandFilter";
-
-// Dynamically import FisheyeCanvas without SSR to prevent window measurement hydration mismatch
-const FisheyeCanvas = dynamic(() => import("./FisheyeCanvas"), {
-  ssr: false,
-  loading: () => (
-    <div className="w-full h-screen flex flex-col items-center justify-center bg-[#030712] gap-4">
-      <div className="w-10 h-10 rounded-full border-2 border-cyber-blue border-t-transparent animate-spin" />
-      <span className="font-mono text-xs text-cyber-blue-light tracking-widest uppercase">
-        // LOADING GALLERY...
-      </span>
-    </div>
-  ),
-});
+import { GALLERY_ITEMS, GalleryFilterState, GalleryItem } from "@/data/galleryData";
+import GalleryFilters from "./GalleryFilters";
+import HorizontalMasonry from "./HorizontalMasonry";
+import LightboxModal from "./LightboxModal";
 
 export default function GalleryContainer() {
   const [filterState, setFilterState] = useState<GalleryFilterState>({
     category: "ALL",
-    year: "ALL",
-    tag: "ALL",
     searchQuery: "",
   });
 
-  // Filter items matching active category, year, and tag selections
+  const [selectedItem, setSelectedItem] = useState<GalleryItem | null>(null);
+
+  // Filter items based on active category and search query
   const filteredItems = useMemo(() => {
     return GALLERY_ITEMS.filter((item) => {
       // Category match
@@ -39,33 +24,48 @@ export default function GalleryContainer() {
       ) {
         return false;
       }
-      // Year match
-      if (filterState.year !== "ALL" && item.year !== filterState.year) {
-        return false;
+
+      // Search Query match
+      if (filterState.searchQuery.trim().length > 0) {
+        const query = filterState.searchQuery.toLowerCase();
+        const matchesTitle = item.title.toLowerCase().includes(query);
+        const matchesCategory = item.category.toLowerCase().includes(query);
+        const matchesTags = item.tags.some((t) => t.toLowerCase().includes(query));
+        const matchesYear = item.year.includes(query);
+        const matchesDesc = item.description?.toLowerCase().includes(query) ?? false;
+
+        return matchesTitle || matchesCategory || matchesTags || matchesYear || matchesDesc;
       }
-      // Tag match
-      if (
-        filterState.tag !== "ALL" &&
-        !item.tags.includes(filterState.tag as any)
-      ) {
-        return false;
-      }
+
       return true;
     });
   }, [filterState]);
 
   return (
-    <div className="w-full h-screen overflow-hidden bg-[#030712] relative">
-      {/* 2D Command Palette Filter UI Overlay (z-40) */}
-      <CommandFilter
+    <div className="w-full flex flex-col">
+      {/* Sticky Header Category & Search Filters */}
+      <GalleryFilters
         filterState={filterState}
         onFilterChange={setFilterState}
-        itemCount={filteredItems.length}
+        filteredCount={filteredItems.length}
         totalCount={GALLERY_ITEMS.length}
       />
 
-      {/* 2D Fisheye Honeycomb Canvas & Physics Engine (z-0) */}
-      <FisheyeCanvas items={filteredItems} />
+      {/* Main Horizontal Multi-Row Masonry Grid */}
+      <div className="w-full py-2">
+        <HorizontalMasonry
+          items={filteredItems}
+          onSelect={setSelectedItem}
+        />
+      </div>
+
+      {/* Full-Screen Glassmorphic Lightbox Modal */}
+      <LightboxModal
+        selectedItem={selectedItem}
+        items={filteredItems}
+        onClose={() => setSelectedItem(null)}
+        onSelect={setSelectedItem}
+      />
     </div>
   );
 }

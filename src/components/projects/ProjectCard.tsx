@@ -1,5 +1,5 @@
 import React from "react";
-import { ProjectRepository } from "@/data/projectsData";
+import { ProjectRepository, ProjectStatus } from "@/data/projectsData";
 
 interface ProjectCardProps {
   project: ProjectRepository;
@@ -61,24 +61,69 @@ function renderProjectIcon(iconType: ProjectRepository["iconType"]) {
   }
 }
 
+function renderStatusBadge(status: ProjectStatus) {
+  switch (status) {
+    case "ACTIVE_DEVELOPMENT":
+      return (
+        <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold tracking-wider uppercase border border-cyan-500/40 bg-cyan-500/10 text-cyan-300 flex items-center gap-1.5 shadow-sm">
+          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+          ACTIVE DEVELOPMENT
+        </span>
+      );
+    case "PRODUCTION_READY":
+      return (
+        <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold tracking-wider uppercase border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 flex items-center gap-1.5 shadow-sm">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+          PRODUCTION READY
+        </span>
+      );
+    case "BETA_TESTING":
+      return (
+        <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold tracking-wider uppercase border border-amber-500/40 bg-amber-500/10 text-amber-300 flex items-center gap-1.5 shadow-sm">
+          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+          BETA TESTING
+        </span>
+      );
+    case "COMPLETED":
+      return (
+        <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold tracking-wider uppercase border border-blue-500/40 bg-blue-500/10 text-blue-300 flex items-center gap-1.5 shadow-sm">
+          <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
+          COMPLETED
+        </span>
+      );
+    case "MAINTAINED":
+      return (
+        <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold tracking-wider uppercase border border-slate-500/40 bg-slate-500/10 text-slate-300 flex items-center gap-1.5 shadow-sm">
+          <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
+          MAINTAINED
+        </span>
+      );
+  }
+}
+
 export default function ProjectCard({ project }: ProjectCardProps) {
   return (
     <div className="rounded-xl border border-[#1E293B] hover:border-[#0088FF] bg-[#0B1120] p-6 flex flex-col justify-between transition-all duration-300 hover:shadow-[0_0_25px_rgba(0,136,255,0.15)] group">
       <div className="flex flex-col gap-4">
-        {/* Card Header: Icon container, Title & Visibility Badge */}
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3.5">
+        {/* Card Header: Icon container, Title, Visibility & Status Badge (Top-Aligned with Title) */}
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+          <div className="flex items-start gap-3.5">
             <div className="w-12 h-12 rounded-lg bg-[#030712] border border-[#1E293B] group-hover:border-cyber-blue/50 flex items-center justify-center shrink-0 transition-colors shadow-[0_0_12px_rgba(0,136,255,0.1)]">
               {renderProjectIcon(project.iconType)}
             </div>
-            <h3 className="font-mono font-bold text-lg text-white group-hover:text-cyber-blue-light transition-colors">
-              {project.name}
-            </h3>
+            <div className="flex flex-col">
+              <h3 className="font-mono font-bold text-lg text-white group-hover:text-cyber-blue-light transition-colors leading-tight">
+                {project.name}
+              </h3>
+              <span className="font-mono text-[11px] text-slate-400 mt-1">
+                {project.visibility} Repository
+              </span>
+            </div>
           </div>
 
-          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-semibold tracking-wider uppercase border border-cyber-blue/30 bg-cyber-blue/10 text-cyber-blue-light">
-            {project.visibility}
-          </span>
+          <div className="self-start">
+            {renderStatusBadge(project.status)}
+          </div>
         </div>
 
         {/* Card Body: Description */}
@@ -119,7 +164,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
           href={project.githubUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#1E293B] hover:border-cyber-blue/60 bg-[#030712] hover:bg-cyber-blue/15 text-slate-200 hover:text-white font-mono text-xs font-semibold tracking-wider transition-all"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#1E293B] hover:border-cyber-blue/60 bg-[#030712] hover:bg-cyber-blue/15 text-slate-200 hover:text-white font-mono text-xs font-semibold tracking-wider transition-all cursor-pointer"
         >
           <span>View on GitHub</span>
           <svg

@@ -40,6 +40,7 @@ export default function Navbar() {
               src="/logo.png"
               alt="WhiteHats Club Logo"
               fill
+              sizes="40px"
               className="object-contain p-0.5"
               priority
             />
