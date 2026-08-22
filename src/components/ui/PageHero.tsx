@@ -122,36 +122,28 @@ function CipherHeading({ prefix, suffix }: { prefix: string; suffix: string }) {
 // --- Slide Up Heading (Gallery) ---
 function SlideUpHeading({ prefix, suffix }: { prefix: string; suffix: string }) {
   return (
-    <div className="relative overflow-hidden">
-      <motion.div
-        className="absolute inset-y-0 left-0 w-0.5 bg-cyber-blue shadow-[0_0_12px_#0088FF] z-10"
-        initial={{ top: "0%", height: "0%" }}
-        animate={{ top: "0%", height: "100%" }}
-        transition={{ duration: 0.4, delay: 0.1, ease: "easeIn" }}
-      />
-      <h1 className="text-4xl sm:text-5xl xl:text-6xl font-black font-mono tracking-tight leading-none">
-        <div className="overflow-hidden">
-          <motion.span
-            className="text-slate-100 inline-block"
-            initial={{ y: "110%" }}
-            animate={{ y: 0 }}
-            transition={{ duration: 0.55, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-          >
-            {prefix}
-          </motion.span>
-        </div>
-        <div className="overflow-hidden">
-          <motion.span
-            className="text-transparent bg-clip-text bg-gradient-to-r from-cyber-blue via-cyber-blue-light to-blue-300 drop-shadow-[0_0_25px_rgba(0,136,255,0.45)] inline-block"
-            initial={{ y: "110%" }}
-            animate={{ y: 0 }}
-            transition={{ duration: 0.55, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
-          >
-            {suffix}
-          </motion.span>
-        </div>
-      </h1>
-    </div>
+    <h1 className="text-4xl sm:text-5xl xl:text-6xl font-black font-mono tracking-tight leading-none">
+      <div className="overflow-hidden">
+        <motion.span
+          className="text-slate-100 inline-block whitespace-nowrap"
+          initial={{ y: "110%" }}
+          animate={{ y: 0 }}
+          transition={{ duration: 0.55, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+        >
+          {prefix}
+        </motion.span>
+      </div>
+      <div className="overflow-hidden">
+        <motion.span
+          className="text-transparent bg-clip-text bg-gradient-to-r from-cyber-blue via-cyber-blue-light to-blue-300 drop-shadow-[0_0_25px_rgba(0,136,255,0.45)] inline-block whitespace-nowrap"
+          initial={{ y: "110%" }}
+          animate={{ y: 0 }}
+          transition={{ duration: 0.55, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
+        >
+          {suffix}
+        </motion.span>
+      </div>
+    </h1>
   );
 }
 

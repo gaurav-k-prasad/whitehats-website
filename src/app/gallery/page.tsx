@@ -1,9 +1,9 @@
+import React from "react";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
 import GalleryContainer from "@/components/gallery/GalleryContainer";
 import GalleryHeroGraphic from "@/components/gallery/GalleryHeroGraphic";
-import Footer from "@/components/layout/Footer";
-import Navbar from "@/components/layout/Navbar";
 import PageHero from "@/components/ui/PageHero";
-import React from "react";
 
 export const metadata = {
   title: "Archival Media | WhiteHats Gallery",
@@ -19,11 +19,11 @@ export default function GalleryPage() {
       <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[800px] h-[350px] bg-cyber-blue/10 rounded-full blur-[140px] pointer-events-none z-0" />
       <div className="fixed bottom-0 right-1/4 w-[600px] h-[300px] bg-cyber-blue/5 rounded-full blur-[120px] pointer-events-none z-0" />
 
-      {/* Main Page Layout Container (Aligned with Home, Events, Projects, Board) */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col gap-10 lg:gap-12 pt-6 pb-12 w-full flex-1">
+      {/* Top Header Container (Contained within max-w-7xl matching Home page header dimensions) */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col gap-10 lg:gap-12 pt-6 w-full">
         <Navbar />
 
-        {/* Gallery Hero Header matching Home page layout */}
+        {/* Gallery Hero Header matching Home page header structure */}
         <PageHero
           label="// OPERATIONAL INTEL // WHITEHATS ARCHIVES"
           headingPrefix="< ARCHIVE"
@@ -32,12 +32,15 @@ export default function GalleryPage() {
           variant="slide-up"
           rightSlot={<GalleryHeroGraphic />}
         />
+      </div>
 
-        {/* Main Animated Masonry Media Grid */}
-        <main className="w-full">
-          <GalleryContainer />
-        </main>
+      {/* Actual Gallery: Full-width outlier expanding to the edge of the screen */}
+      <main className="relative z-10 flex-1 w-full pb-16 pt-6">
+        <GalleryContainer />
+      </main>
 
+      {/* Footer (Contained within max-w-7xl) */}
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8 w-full">
         <Footer />
       </div>
     </div>
