@@ -7,6 +7,9 @@ export interface ClubEvent {
     location: string;
     description: string;
     tags: string[];
+    // Optional Cloudinary public ID / URL for the timeline card cover image.
+    // TODO: fill in once event photos are uploaded to Cloudinary.
+    imageUrl?: string;
 }
 
 export const EVENTS_DATA: ClubEvent[] = [

@@ -2,7 +2,7 @@ import React from "react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import EventsHero from "@/components/events/EventsHero";
-import EventsGrid from "@/components/events/EventsGrid";
+import EventsTimeline from "@/components/events/EventsTimeline";
 import CyberGrid from "@/components/ui/CyberGrid";
 
 export const metadata = {
@@ -21,7 +21,7 @@ export default function EventsPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col gap-10 lg:gap-12 pt-6 pb-12">
         <Navbar />
         <EventsHero />
-        <EventsGrid />
+        <EventsTimeline />
         <Footer />
       </div>
     </div>
