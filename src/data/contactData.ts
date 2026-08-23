@@ -24,7 +24,7 @@ export const CONTACT_CHANNELS: ContactChannel[] = [
     label: "EMAIL_US",
     // TODO: swap for the official club inbox
     value: "whitehats@vit.ac.in",
-    href: "whitehats@vit.ac.in",
+    href: "mailto:whitehats@vit.ac.in",
     iconType: "mail",
     hint: "Best for recruitment, sponsorships & press",
   },

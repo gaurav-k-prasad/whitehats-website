@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { CloudinaryImage } from "@/components/ui/cloudinary";
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { BoardMember } from "@/data/boardData";
@@ -46,7 +46,7 @@ export default function BoardCard({ member, isLarge = false }: BoardCardProps) {
 
           {/* Board Member Image or Fallback */}
           {member.imageUrl && !imageError ? (
-            <Image
+            <CloudinaryImage
               src={member.imageUrl}
               alt={member.name}
               fill
