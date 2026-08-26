@@ -22,7 +22,7 @@ export interface GalleryFilterState {
 // TODO: swap in real titles/dates/tags once available — imageUrl values
 // are real Cloudinary public IDs from the `gallery` folder.
 export const GALLERY_ITEMS: GalleryItem[] = [
-  { id: "01", title: "CTF Session", quote: "", date: "", year: "2026", category: "CTFs", tags: ["Web Security", "Cryptography"], imageUrl: "ctf", width: 620, height: 420, aspectClass: "aspect-[3/2]" },
+  { id: "01", title: "CTF Session #1", quote: "", date: "", year: "2026", category: "CTFs", tags: ["Web Security", "Cryptography"], imageUrl: "ctf", width: 620, height: 420, aspectClass: "aspect-[3/2]" },
   { id: "02", title: "CTF Session #2", quote: "", date: "", year: "2026", category: "CTFs", tags: ["Binary Exploitation", "Forensics"], imageUrl: "ctf2", width: 500, height: 500, aspectClass: "aspect-square" },
 
   { id: "03", title: "Workshop #1", quote: "", date: "", year: "2026", category: "WORKSHOPS", tags: ["Hardware Security"], imageUrl: "ws1", width: 480, height: 640, aspectClass: "aspect-[3/4]" },

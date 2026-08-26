@@ -7,7 +7,6 @@ import BoardHeroGraphic from "@/components/board/BoardHeroGraphic";
 import AboutStatsBand from "@/components/about/AboutStatsBand";
 import MissionSection from "@/components/about/MissionSection";
 import ValuesGrid from "@/components/about/ValuesGrid";
-import MilestonesTimeline from "@/components/about/MilestonesTimeline";
 import AboutCTABanner from "@/components/about/AboutCTABanner";
 import { ABOUT_HERO_DATA } from "@/data/aboutData";
 
@@ -36,7 +35,6 @@ export default function AboutPage() {
         <AboutStatsBand />
         <MissionSection />
         <ValuesGrid />
-        <MilestonesTimeline />
         <AboutCTABanner />
 
         <Footer />

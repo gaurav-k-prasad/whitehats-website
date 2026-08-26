@@ -115,9 +115,7 @@ export const FEATURE_CARDS: FeatureCardData[] = [
     ctaText: "EXPLORE EVENTS",
     ctaHref: "/events",
     events: [
-      { title: "> Whitehats Flagship CTF", date: "AUG 29, 2026" },
-      { title: "> Advanced Binary Exploitation", date: "SEP 12, 2026" },
-      { title: "> Red Team & AD Operations", date: "SEP 26, 2026" },
+      { title: "> Huntscape", date: "Gravitas 2026" },
     ],
   },
   {

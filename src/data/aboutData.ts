@@ -16,12 +16,6 @@ export interface AboutStat {
   value: string;
 }
 
-export interface AboutMilestone {
-  year: string;
-  title: string;
-  description: string;
-}
-
 export const ABOUT_HERO_DATA = {
   label: "// CLUB DOSSIER",
   headingPrefix: "< WHO WE",
@@ -40,7 +34,7 @@ export const ABOUT_MISSION = {
 export const ABOUT_STATS: AboutStat[] = [
   { label: "Active Members", value: "800+" },
   { label: "Events Conducted", value: "10+" },
-  { label: "Open-Source Tools", value: "4+" },
+  { label: "Open-Source Tools", value: "2+" },
   { label: "Founded", value: "2024" },
 ];
 
@@ -72,25 +66,6 @@ export const ABOUT_VALUES: AboutValue[] = [
     description:
       "From campus infra audits to open-source security tools, we ship work that matters outside the classroom.",
     iconType: "target",
-  },
-];
-
-// TODO: replace with the club's actual timeline / key milestones
-export const ABOUT_MILESTONES: AboutMilestone[] = [
-  {
-    year: "2025",
-    title: "WhiteHats Founded",
-    description: "A small group of students at VIT Vellore forms the club around a shared obsession with offensive security.",
-  },
-  {
-    year: "2025",
-    title: "First Flagship CTF",
-    description: "Launched our first campus-wide Capture The Flag competition, drawing teams across web, crypto, and pwn categories.",
-  },
-  {
-    year: "2026",
-    title: "Scaling Operations",
-    description: "Expanded into open-source tooling, cloud security workshops, and inter-college collaborations.",
   },
 ];
 
