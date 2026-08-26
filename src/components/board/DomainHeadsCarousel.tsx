@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion, PanInfo } from "framer-motion";
 import { BOARD_DATA, BoardMember } from "@/data/boardData";
 import BoardCard from "./BoardCard";
@@ -20,6 +20,7 @@ export default function DomainHeadsCarousel() {
   const [domainMembers, setDomainMembers] = useState<BoardMember[]>(rawDomainMembers);
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const [isMounted, setIsMounted] = useState<boolean>(false);
+  const isDraggingRef = useRef<boolean>(false);
 
   // Randomize the entire order of Domain Heads on mount
   useEffect(() => {
@@ -27,20 +28,48 @@ export default function DomainHeadsCarousel() {
     setIsMounted(true);
   }, []);
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     setActiveIndex((prev) => (prev + 1) % domainMembers.length);
-  };
+  }, [domainMembers.length]);
 
-  const handlePrev = () => {
+  const handlePrev = useCallback(() => {
     setActiveIndex((prev) => (prev - 1 + domainMembers.length) % domainMembers.length);
+  }, [domainMembers.length]);
+
+  // Keyboard navigation support (Left/Right Arrow keys)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't intercept if user is typing in an input
+      if (["INPUT", "TEXTAREA"].includes((e.target as HTMLElement)?.tagName)) return;
+
+      if (e.key === "ArrowLeft") {
+        handlePrev();
+      } else if (e.key === "ArrowRight") {
+        handleNext();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handleNext, handlePrev]);
+
+  const handleDragStart = () => {
+    isDraggingRef.current = true;
   };
 
   const handleDragEnd = (_: unknown, info: PanInfo) => {
-    if (info.offset.x < -40) {
+    const swipeThreshold = 35;
+    const velocityThreshold = 200;
+
+    if (info.offset.x < -swipeThreshold || info.velocity.x < -velocityThreshold) {
       handleNext();
-    } else if (info.offset.x > 40) {
+    } else if (info.offset.x > swipeThreshold || info.velocity.x > velocityThreshold) {
       handlePrev();
     }
+
+    // Delay clearing dragging state slightly to prevent click event trigger
+    setTimeout(() => {
+      isDraggingRef.current = false;
+    }, 100);
   };
 
   if (!isMounted) {
@@ -52,7 +81,7 @@ export default function DomainHeadsCarousel() {
   }
 
   return (
-    <section className="flex flex-col gap-8 pt-4 pb-12 overflow-hidden">
+    <section className="flex flex-col gap-8 pt-4 pb-12 overflow-hidden select-none">
       {/* Section Header */}
       <div className="flex items-center justify-between border-b border-card-border pb-3">
         <div className="flex items-center gap-3">
@@ -87,7 +116,7 @@ export default function DomainHeadsCarousel() {
 
       {/* 3D Cover Flow Carousel Stage */}
       <div
-        className="relative w-full h-[580px] sm:h-[640px] md:h-[680px] flex items-center justify-center select-none"
+        className="relative w-full h-[580px] sm:h-[640px] md:h-[680px] flex items-center justify-center touch-pan-y"
         style={{ perspective: "1400px" }}
       >
         {domainMembers.map((member: BoardMember, index: number) => {
@@ -113,7 +142,7 @@ export default function DomainHeadsCarousel() {
           return (
             <motion.div
               key={member.id}
-              className="absolute cursor-pointer w-[290px] sm:w-[360px] md:w-[400px]"
+              className="absolute cursor-pointer w-[290px] sm:w-[360px] md:w-[400px] touch-pan-y"
               animate={{
                 x: xTranslation,
                 rotateY: rotateY,
@@ -126,11 +155,15 @@ export default function DomainHeadsCarousel() {
                 stiffness: 240,
                 damping: 26,
               }}
-              drag={isCenter ? "x" : false}
+              drag="x"
               dragConstraints={{ left: 0, right: 0 }}
               dragElastic={0.2}
+              onDragStart={handleDragStart}
               onDragEnd={handleDragEnd}
-              onClick={() => setActiveIndex(index)}
+              onClick={() => {
+                if (isDraggingRef.current) return;
+                setActiveIndex(index);
+              }}
             >
               <div
                 className={`transition-all duration-300 ${

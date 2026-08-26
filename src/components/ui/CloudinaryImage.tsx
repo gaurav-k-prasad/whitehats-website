@@ -18,6 +18,7 @@ export default function CloudinaryImage({
   width,
   height,
   className,
+  draggable = false,
   ...props
 }: CloudinaryImageProps) {
   return (
@@ -27,6 +28,7 @@ export default function CloudinaryImage({
       width={width}
       height={height}
       className={className}
+      draggable={draggable}
       {...props}
     />
   );

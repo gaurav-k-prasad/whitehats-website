@@ -2,6 +2,7 @@ import React from "react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import CoreLeadership from "@/components/board/CoreLeadership";
+import ViceLeadership from "@/components/board/ViceLeadership";
 import DomainHeadsCarousel from "@/components/board/DomainHeadsCarousel";
 import BoardHeroGraphic from "@/components/board/BoardHeroGraphic";
 import PageHero from "@/components/ui/PageHero";
@@ -34,6 +35,7 @@ export default function BoardPage() {
 
         {/* Board Sections */}
         <CoreLeadership />
+        <ViceLeadership />
         <DomainHeadsCarousel />
 
         <Footer />

@@ -28,19 +28,18 @@ export default function BoardCard({ member, isLarge = false }: BoardCardProps) {
         <ScanlineOverlay opacity="opacity-[0.03]" />
 
         {/* Top Image Section with strict portrait aspect ratio */}
-        <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden border border-card-border bg-[#121826] flex items-center justify-center group-hover:border-cyber-blue/40 transition-colors">
-          {/* Technical CSS Grid Overlay */}
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#1E293B25_1px,transparent_1px),linear-gradient(to_bottom,#1E293B25_1px,transparent_1px)] bg-[size:1rem_1rem] pointer-events-none z-10 opacity-60" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,136,255,0.1)_0%,transparent_70%)] pointer-events-none z-10" />
+        <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden border border-card-border bg-[#121826] flex items-center justify-center group-hover:border-cyber-blue/40 transition-colors pointer-events-none select-none">
+          {/* Subtle Cyber Glow Backdrop */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,136,255,0.08)_0%,transparent_70%)] pointer-events-none z-10" />
 
           {/* Top-Left: Glowing Status Dot */}
-          <div className="absolute top-3 left-3 z-20 flex items-center gap-1.5 bg-[#030712]/80 backdrop-blur-md px-2 py-1 rounded-md border border-card-border">
+          <div className="absolute top-3 left-3 z-20 flex items-center gap-1.5 bg-[#030712]/80 backdrop-blur-md px-2 py-1 rounded-md border border-card-border pointer-events-none">
             <span className="w-1.5 h-1.5 rounded-full bg-cyber-blue shadow-[0_0_8px_#0088FF] animate-pulse" />
             <span className="text-[9px] font-mono text-slate-400 font-semibold tracking-wider">ACTIVE</span>
           </div>
 
           {/* Top-Right: ID Tag */}
-          <div className="absolute top-3 right-3 z-20 bg-[#030712]/80 backdrop-blur-md px-2 py-1 rounded-md border border-card-border text-[10px] font-mono text-cyber-blue-light font-bold">
+          <div className="absolute top-3 right-3 z-20 bg-[#030712]/80 backdrop-blur-md px-2 py-1 rounded-md border border-card-border text-[10px] font-mono text-cyber-blue-light font-bold pointer-events-none">
             {member.id}
           </div>
 
@@ -51,7 +50,8 @@ export default function BoardCard({ member, isLarge = false }: BoardCardProps) {
               alt={member.name}
               fill
               sizes="(max-width: 768px) 100vw, 400px"
-              className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
+              className="object-cover object-top transition-transform duration-500 group-hover:scale-105 pointer-events-none select-none"
+              draggable={false}
               onError={() => setImageError(true)}
             />
           ) : (
