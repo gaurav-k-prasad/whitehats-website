@@ -331,9 +331,9 @@ export default function AdminGalleryPage() {
           onClick={(e) => {
             if (e.target === e.currentTarget) setEditingItem(null);
           }}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+          className="fixed inset-0 z-[99999] overflow-y-auto bg-black/85 backdrop-blur-md p-4 sm:p-6 md:p-8 flex justify-center items-start min-h-screen py-8 sm:py-12"
         >
-          <div className="w-full max-w-xl max-h-[90vh] overflow-y-auto">
+          <div className="w-full max-w-xl my-auto">
             <CyberCardBorder contentClassName="p-6 flex flex-col gap-5">
               <div className="flex items-center justify-between border-b border-[#1E293B] pb-3">
                 <div className="flex items-center gap-2 font-mono text-sm font-bold text-white">

@@ -145,12 +145,12 @@ export default function ImageUploadPicker(props: ImageUploadPickerProps) {
 
   return (
     <div className={`flex flex-col gap-2.5 ${props.className || ""}`}>
-      <div className="flex items-center justify-between">
-        <label className="text-xs font-mono font-medium text-slate-300 flex items-center gap-2">
-          <ImageIcon className="w-3.5 h-3.5 text-cyber-blue" />
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <label className="text-xs font-mono font-medium text-slate-300 flex items-center gap-1.5 whitespace-nowrap">
+          <ImageIcon className="w-3.5 h-3.5 text-cyber-blue shrink-0" />
           <span>{props.label || "IMAGE UPLOAD"}</span>
           {props.folderHint && (
-            <span className="text-[10px] text-slate-500 font-mono">
+            <span className="text-[10px] text-slate-500 font-mono hidden xs:inline sm:inline">
               ({props.folderHint})
             </span>
           )}
@@ -160,9 +160,9 @@ export default function ImageUploadPicker(props: ImageUploadPickerProps) {
           <button
             type="button"
             onClick={() => setShowManualInput(!showManualInput)}
-            className="text-[11px] font-mono text-slate-400 hover:text-cyber-blue flex items-center gap-1 transition-colors cursor-pointer"
+            className="text-[11px] font-mono text-slate-400 hover:text-cyber-blue flex items-center gap-1 transition-colors cursor-pointer whitespace-nowrap"
           >
-            <LinkIcon className="w-3 h-3" />
+            <LinkIcon className="w-3 h-3 shrink-0" />
             <span>{showManualInput ? "Use File Upload" : "Or manual ID / URL"}</span>
           </button>
         )}
