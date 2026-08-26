@@ -1,4 +1,6 @@
+import fs from "fs";
 import { ImageResponse } from "next/og";
+import path from "path";
 
 // Route segment config
 export const runtime = "nodejs";
@@ -12,6 +14,10 @@ export const contentType = "image/png";
 
 // Image generation for tab icon/favicon
 export default async function Icon() {
+  const logoPath = path.join(process.cwd(), "public", "logo.png");
+  const logoBuffer = fs.readFileSync(logoPath);
+  const logoBase64 = `data:image/png;base64,${logoBuffer.toString("base64")}`;
+
   return new ImageResponse(
     (
       <div
@@ -30,13 +36,15 @@ export default async function Icon() {
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="http://localhost:3000/logo.png"
+          src={logoBase64}
           alt="WhiteHats Logo"
+          width="54"
+          height="54"
           style={{
             width: "85%",
             height: "85%",
             objectFit: "contain",
-            borderRadius: "50%",
+            borderRadius: "30%",
           }}
         />
       </div>
