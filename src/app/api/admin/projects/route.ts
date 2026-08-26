@@ -41,11 +41,28 @@ export async function POST(request: Request) {
     const parsedTechStack = Array.isArray(techStack) ? techStack : typeof techStack === 'string' ? techStack.split(',').map((t: string) => t.trim()) : [];
 
     const db = getDb();
-    if (db) {
-      await db
-        .insert(schema.projects)
-        .values({
-          id: projectId,
+    if (!db) {
+      throw new Error('Database connection failed: D1 binding or local database not found.');
+    }
+
+    await db
+      .insert(schema.projects)
+      .values({
+        id: projectId,
+        slug: projectSlug,
+        name: name.trim(),
+        visibility: visibility || 'Public',
+        status: status || 'ACTIVE_DEVELOPMENT',
+        description: description.trim(),
+        iconType: iconType || 'terminal',
+        techStack: parsedTechStack,
+        contributors: contributors ? Number(contributors) : 1,
+        githubUrl: githubUrl.trim(),
+        liveDemoUrl: liveDemoUrl ? liveDemoUrl.trim() : null,
+      })
+      .onConflictDoUpdate({
+        target: schema.projects.id,
+        set: {
           slug: projectSlug,
           name: name.trim(),
           visibility: visibility || 'Public',
@@ -56,23 +73,8 @@ export async function POST(request: Request) {
           contributors: contributors ? Number(contributors) : 1,
           githubUrl: githubUrl.trim(),
           liveDemoUrl: liveDemoUrl ? liveDemoUrl.trim() : null,
-        })
-        .onConflictDoUpdate({
-          target: schema.projects.id,
-          set: {
-            slug: projectSlug,
-            name: name.trim(),
-            visibility: visibility || 'Public',
-            status: status || 'ACTIVE_DEVELOPMENT',
-            description: description.trim(),
-            iconType: iconType || 'terminal',
-            techStack: parsedTechStack,
-            contributors: contributors ? Number(contributors) : 1,
-            githubUrl: githubUrl.trim(),
-            liveDemoUrl: liveDemoUrl ? liveDemoUrl.trim() : null,
-          },
-        });
-    }
+        },
+      });
 
     try {
       revalidateTag('projects', { expire: 0 });

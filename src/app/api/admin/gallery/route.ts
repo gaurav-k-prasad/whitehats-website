@@ -129,10 +129,12 @@ export async function POST(request: Request) {
       const newGalleryItems = await Promise.all(uploadPromises);
 
       // 2. Insert all items into database
-      if (db) {
-        for (const item of newGalleryItems) {
-          await db.insert(schema.galleryItems).values(item);
-        }
+      if (!db) {
+        throw new Error('Database connection failed: D1 binding or local database not found.');
+      }
+
+      for (const item of newGalleryItems) {
+        await db.insert(schema.galleryItems).values(item);
       }
 
       try {
@@ -173,11 +175,28 @@ export async function POST(request: Request) {
 
     const itemId = singleId || (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `gallery-${Date.now()}`);
 
-    if (db) {
-      await db
-        .insert(schema.galleryItems)
-        .values({
-          id: itemId,
+    if (!db) {
+      throw new Error('Database connection failed: D1 binding or local database not found.');
+    }
+
+    await db
+      .insert(schema.galleryItems)
+      .values({
+        id: itemId,
+        title: title.trim(),
+        quote: quote || '',
+        date: date || '',
+        year,
+        category,
+        tags,
+        imageUrl: finalImageUrl,
+        width,
+        height,
+        aspectClass,
+      })
+      .onConflictDoUpdate({
+        target: schema.galleryItems.id,
+        set: {
           title: title.trim(),
           quote: quote || '',
           date: date || '',
@@ -188,23 +207,8 @@ export async function POST(request: Request) {
           width,
           height,
           aspectClass,
-        })
-        .onConflictDoUpdate({
-          target: schema.galleryItems.id,
-          set: {
-            title: title.trim(),
-            quote: quote || '',
-            date: date || '',
-            year,
-            category,
-            tags,
-            imageUrl: finalImageUrl,
-            width,
-            height,
-            aspectClass,
-          },
-        });
-    }
+        },
+      });
 
     try {
       revalidateTag('gallery', { expire: 0 });

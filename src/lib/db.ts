@@ -11,23 +11,26 @@ import { GalleryItem, GALLERY_ITEMS } from '@/data/galleryData';
 import { ProjectRepository, PROJECTS_DATA } from '@/data/projectsData';
 import { AboutStat, ABOUT_STATS } from '@/data/aboutData';
 
-interface CloudflareRuntimeEnv {
-  DB?: unknown;
-}
-
 /**
  * Universal Database Getter:
  * 1. Checks for Cloudflare D1 runtime binding (in production/preview on Cloudflare Pages/Workers)
  * 2. If null (in standard Node.js Next.js dev server), connects directly to local SQLite database in .wrangler
  */
 export function getDb() {
-  const env = process.env as unknown as CloudflareRuntimeEnv;
+  const env = process.env as unknown as Record<string, unknown>;
 
-  // Cloudflare Pages / Workers runtime binding
+  // Cloudflare Pages / Workers runtime binding (checks DB, whitehats_prod_db, and global bindings)
+  const g = typeof globalThis !== 'undefined' ? (globalThis as Record<string, unknown>) : {};
+  const gEnv = (g.__env__ || g.__cf_env__ || g.env || {}) as Record<string, unknown>;
+
   const rawD1 =
-    env.DB ||
-    (typeof globalThis !== 'undefined' && (globalThis as Record<string, unknown>).DB) ||
-    (typeof process !== 'undefined' && process.env && (process.env as Record<string, unknown>).DB);
+    env?.DB ||
+    env?.whitehats_prod_db ||
+    env?.DATABASE ||
+    g?.DB ||
+    g?.whitehats_prod_db ||
+    gEnv?.DB ||
+    gEnv?.whitehats_prod_db;
 
   if (rawD1) {
     if (typeof (rawD1 as { select?: unknown }).select === 'function') {

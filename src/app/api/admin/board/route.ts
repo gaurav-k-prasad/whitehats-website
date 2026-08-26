@@ -86,13 +86,26 @@ export async function POST(request: Request) {
 
     const memberId = id || (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `board-${Date.now()}`);
     const db = getDb();
+    if (!db) {
+      throw new Error('Database connection failed: D1 binding or local database not found.');
+    }
 
     // 2. Database Insert / Update
-    if (db) {
-      await db
-        .insert(schema.boardMembers)
-        .values({
-          id: memberId,
+    await db
+      .insert(schema.boardMembers)
+      .values({
+        id: memberId,
+        name: name.trim(),
+        role: role.trim(),
+        category,
+        imageUrl: imageUrl || 'default_avatar',
+        bio: bio || '',
+        isActive: isActive,
+        tenureYear: '2026',
+      })
+      .onConflictDoUpdate({
+        target: schema.boardMembers.id,
+        set: {
           name: name.trim(),
           role: role.trim(),
           category,
@@ -100,20 +113,8 @@ export async function POST(request: Request) {
           bio: bio || '',
           isActive: isActive,
           tenureYear: '2026',
-        })
-        .onConflictDoUpdate({
-          target: schema.boardMembers.id,
-          set: {
-            name: name.trim(),
-            role: role.trim(),
-            category,
-            imageUrl: imageUrl || 'default_avatar',
-            bio: bio || '',
-            isActive: isActive,
-            tenureYear: '2026',
-          },
-        });
-    }
+        },
+      });
 
     try {
       revalidateTag('board', { expire: 0 });

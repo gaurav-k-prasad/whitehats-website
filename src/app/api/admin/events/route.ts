@@ -108,13 +108,31 @@ export async function POST(request: Request) {
 
     const eventId = id || (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `event-${Date.now()}`);
     const db = getDb();
+    if (!db) {
+      throw new Error('Database connection failed: D1 binding or local database not found. Cannot save event.');
+    }
 
     // 2. Database Insert / Update
-    if (db) {
-      await db
-        .insert(schema.events)
-        .values({
-          id: eventId,
+    await db
+      .insert(schema.events)
+      .values({
+        id: eventId,
+        title: title.trim(),
+        type,
+        status: status || 'UPCOMING',
+        date,
+        time: time || 'TBA',
+        location: location || 'VIT Vellore',
+        mode: mode || null,
+        description: description || '',
+        tags: tags,
+        highlights: highlights,
+        imageUrl: imageUrl || null,
+        registrationUrl: registrationUrl || null,
+      })
+      .onConflictDoUpdate({
+        target: schema.events.id,
+        set: {
           title: title.trim(),
           type,
           status: status || 'UPCOMING',
@@ -127,25 +145,8 @@ export async function POST(request: Request) {
           highlights: highlights,
           imageUrl: imageUrl || null,
           registrationUrl: registrationUrl || null,
-        })
-        .onConflictDoUpdate({
-          target: schema.events.id,
-          set: {
-            title: title.trim(),
-            type,
-            status: status || 'UPCOMING',
-            date,
-            time: time || 'TBA',
-            location: location || 'VIT Vellore',
-            mode: mode || null,
-            description: description || '',
-            tags: tags,
-            highlights: highlights,
-            imageUrl: imageUrl || null,
-            registrationUrl: registrationUrl || null,
-          },
-        });
-    }
+        },
+      });
 
     try {
       revalidateTag('events', { expire: 0 });
