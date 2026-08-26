@@ -124,16 +124,16 @@ export function executeCommand(input: string): CommandResult {
                   key={project.id}
                   className="bg-card-bg/70 border border-card-border/80 p-2.5 rounded text-xs space-y-1"
                 >
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                     <a
                       href={project.githubUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-cyber-blue-light font-bold hover:underline"
+                      className="text-cyber-blue-light font-bold hover:underline break-all"
                     >
                       {project.name}
                     </a>
-                    <span className="text-text-muted text-[10px] font-mono">
+                    <span className="text-text-muted text-[10px] font-mono shrink-0">
                       {project.contributors} contributors
                     </span>
                   </div>

@@ -123,24 +123,27 @@ export default function ProjectCard({ project }: ProjectCardProps) {
 
         <div className="flex flex-col gap-4">
           {/* Card Header */}
-          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
-            <div className="flex items-start gap-3.5">
-              <div className="w-12 h-12 rounded-lg bg-[#030712] border border-card-border group-hover:border-cyber-blue/60 flex items-center justify-center shrink-0 transition-colors shadow-[0_0_12px_rgba(0,136,255,0.1)]">
-                {renderProjectIcon(project.iconType)}
+          <div className="flex flex-col gap-3">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-3.5 min-w-0">
+                <div className="w-12 h-12 rounded-lg bg-[#030712] border border-card-border group-hover:border-cyber-blue/60 flex items-center justify-center shrink-0 transition-colors shadow-[0_0_12px_rgba(0,136,255,0.1)]">
+                  {renderProjectIcon(project.iconType)}
+                </div>
+                <div className="flex flex-col min-w-0">
+                  <span className="font-mono text-[11px] text-slate-400">
+                    {project.visibility} Repository
+                  </span>
+                </div>
               </div>
-              <div className="flex flex-col">
-                <h3 className="font-mono font-bold text-lg text-white group-hover:text-cyber-blue-light transition-colors leading-tight">
-                  {project.name}
-                </h3>
-                <span className="font-mono text-[11px] text-slate-400 mt-1">
-                  {project.visibility} Repository
-                </span>
+
+              <div className="shrink-0">
+                {renderStatusBadge(project.status)}
               </div>
             </div>
 
-            <div className="self-start">
-              {renderStatusBadge(project.status)}
-            </div>
+            <h3 className="font-mono font-bold text-base sm:text-lg text-white group-hover:text-cyber-blue-light transition-colors leading-snug break-words">
+              {project.name}
+            </h3>
           </div>
 
           {/* Card Body */}
