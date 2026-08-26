@@ -1,22 +1,38 @@
 import { v2 as cloudinary } from 'cloudinary';
 
-// Configure Cloudinary SDK
-if (process.env.CLOUDINARY_URL) {
-  cloudinary.config({
-    cloudinary_url: process.env.CLOUDINARY_URL,
-  });
-} else {
-  cloudinary.config({
-    cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-    secure: true,
-  });
+function cleanEnv(val?: string): string | undefined {
+  if (!val) return undefined;
+  return val.trim().replace(/^["']|["']$/g, '');
+}
+
+/**
+ * Ensures Cloudinary SDK is dynamically configured with trimmed credentials.
+ */
+export function ensureCloudinaryConfig() {
+  const cloudinaryUrl = cleanEnv(process.env.CLOUDINARY_URL);
+  const cloudName = cleanEnv(process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || process.env.CLOUDINARY_CLOUD_NAME);
+  const apiKey = cleanEnv(process.env.CLOUDINARY_API_KEY);
+  const apiSecret = cleanEnv(process.env.CLOUDINARY_API_SECRET);
+
+  if (cloudinaryUrl) {
+    cloudinary.config({
+      cloudinary_url: cloudinaryUrl,
+      secure: true,
+    });
+  } else if (cloudName && apiKey && apiSecret) {
+    cloudinary.config({
+      cloud_name: cloudName,
+      api_key: apiKey,
+      api_secret: apiSecret,
+      secure: true,
+    });
+  }
 }
 
 export function isCloudinaryServerConfigured(): boolean {
+  ensureCloudinaryConfig();
   const config = cloudinary.config();
-  return Boolean(config.cloud_name && (config.api_key && config.api_secret || process.env.CLOUDINARY_URL));
+  return Boolean(config.cloud_name && ((config.api_key && config.api_secret) || config.cloudinary_url));
 }
 
 export interface CloudinaryUploadResult {
@@ -43,16 +59,20 @@ export async function uploadBufferToCloudinary(
 ): Promise<CloudinaryUploadResult> {
   if (!isCloudinaryServerConfigured()) {
     throw new Error(
-      'Cloudinary API credentials missing. Please set CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET in your environment.'
+      'Cloudinary API credentials missing or invalid. Please check CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET, and CLOUDINARY_CLOUD_NAME in your environment.'
     );
   }
+
+  const sanitizedTags = options.tags
+    ? options.tags.map((t) => t.trim()).filter(Boolean)
+    : undefined;
 
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
       {
         folder: options.folder || 'whitehats',
         public_id: options.publicId,
-        tags: options.tags,
+        tags: sanitizedTags,
         resource_type: 'image',
         ...options.transformation,
       },
