@@ -3,6 +3,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import GalleryContainer from "@/components/gallery/GalleryContainer";
 import GalleryHeroGraphic from "@/components/gallery/GalleryHeroGraphic";
+import { GALLERY_ITEMS } from "@/data/galleryData";
 import PageHero from "@/components/ui/PageHero";
 import CyberGrid from "@/components/ui/CyberGrid";
 
@@ -27,7 +28,7 @@ export default function GalleryPage() {
           label="// OPERATIONAL INTEL // WHITEHATS ARCHIVES"
           headingPrefix="< ARCHIVE"
           headingSuffix="GALLERY />"
-          description="100+ classified records covering national hackathons, offensive CTFs, technical bootcamps, and behind-the-scenes team milestones."
+          description={`${GALLERY_ITEMS.length} classified records covering national hackathons, offensive CTFs, technical bootcamps, and behind-the-scenes team milestones.`}
           variant="slide-up"
           rightSlot={<GalleryHeroGraphic />}
         />

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
+import { CloudinaryImage } from "@/components/ui/cloudinary";
 import { motion } from "framer-motion";
 import { GalleryItem } from "@/data/galleryData";
 
@@ -50,7 +50,7 @@ export default function GalleryCard({ item, onSelect }: GalleryCardProps) {
 
         {/* Static, Crisp Full-Bleed Image at True Aspect Ratio */}
         {!imageError ? (
-          <Image
+          <CloudinaryImage
             src={item.imageUrl}
             alt={item.title}
             fill

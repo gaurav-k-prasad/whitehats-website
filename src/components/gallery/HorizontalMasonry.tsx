@@ -22,24 +22,28 @@ export default function HorizontalMasonry({
   const [startX, setStartX] = useState(0);
   const [scrollLeftPos, setScrollLeftPos] = useState(0);
   const hasDraggedRef = useRef(false);
-  const [numRows, setNumRows] = useState(3);
+const [baseRows, setBaseRows] = useState(3);
 
-  // Responsive row count (2 rows on small/tablet, 3 rows on large screens)
-  useEffect(() => {
-    const handleResize = () => {
-      if (typeof window !== "undefined") {
-        if (window.innerWidth < 768) {
-          setNumRows(2);
-        } else {
-          setNumRows(3);
-        }
+// Responsive base row count (2 rows on small/tablet, 3 rows on large screens)
+useEffect(() => {
+  const handleResize = () => {
+    if (typeof window !== "undefined") {
+      if (window.innerWidth < 768) {
+        setBaseRows(2);
+      } else {
+        setBaseRows(3);
       }
-    };
+    }
+  };
 
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  handleResize();
+  window.addEventListener("resize", handleResize);
+  return () => window.removeEventListener("resize", handleResize);
+}, []);
+
+// With a small/filtered item count, cap the row count so each row still
+// gets a few cards instead of splitting into mostly-empty rows.
+const numRows = Math.max(1, Math.min(baseRows, Math.ceil(items.length / 3)));
 
   // Split filtered items into parallel horizontal rows
   const rowSlices = useMemo(() => {
