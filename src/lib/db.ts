@@ -1,14 +1,15 @@
-import { drizzle } from 'drizzle-orm/better-sqlite3';
+import { drizzle as drizzleSqlite } from 'drizzle-orm/better-sqlite3';
+import { drizzle as drizzleD1 } from 'drizzle-orm/d1';
 import Database from 'better-sqlite3';
 import { eq } from 'drizzle-orm';
 import fs from 'fs';
 import path from 'path';
 import * as schema from '@/db/schema';
-import { sortEventsDescending, ClubEvent } from '@/data/eventsData';
-import { BoardMember } from '@/data/boardData';
-import { GalleryItem } from '@/data/galleryData';
-import { ProjectRepository } from '@/data/projectsData';
-import { AboutStat } from '@/data/aboutData';
+import { sortEventsDescending, ClubEvent, EVENTS_DATA } from '@/data/eventsData';
+import { BoardMember, BOARD_DATA } from '@/data/boardData';
+import { GalleryItem, GALLERY_ITEMS } from '@/data/galleryData';
+import { ProjectRepository, PROJECTS_DATA } from '@/data/projectsData';
+import { AboutStat, ABOUT_STATS } from '@/data/aboutData';
 
 interface CloudflareRuntimeEnv {
   DB?: unknown;
@@ -23,11 +24,20 @@ export function getDb() {
   const env = process.env as unknown as CloudflareRuntimeEnv;
 
   // Cloudflare Pages / Workers runtime binding
-  if (env.DB) {
-    return env.DB as ReturnType<typeof drizzle>;
-  }
-  if (typeof globalThis !== 'undefined' && 'DB' in globalThis) {
-    return (globalThis as unknown as { DB: ReturnType<typeof drizzle> }).DB;
+  const rawD1 =
+    env.DB ||
+    (typeof globalThis !== 'undefined' && (globalThis as Record<string, unknown>).DB) ||
+    (typeof process !== 'undefined' && process.env && (process.env as Record<string, unknown>).DB);
+
+  if (rawD1) {
+    if (typeof (rawD1 as { select?: unknown }).select === 'function') {
+      return rawD1 as ReturnType<typeof drizzleSqlite>;
+    }
+    try {
+      return drizzleD1(rawD1 as Parameters<typeof drizzleD1>[0], { schema }) as unknown as ReturnType<typeof drizzleSqlite>;
+    } catch (e) {
+      console.warn('[D1 Bridge] Unable to wrap Cloudflare D1 instance:', e);
+    }
   }
 
   // Node.js Local Dev Server Fallback -> read from local miniflare SQLite file
@@ -35,11 +45,11 @@ export function getDb() {
     const wranglerDir = path.join(process.cwd(), '.wrangler', 'state', 'v3', 'd1', 'miniflare-D1DatabaseObject');
     if (fs.existsSync(wranglerDir)) {
       const files = fs.readdirSync(wranglerDir);
-      const sqliteFile = files.find((f) => f.endsWith('.sqlite'));
+      const sqliteFile = files.find((f) => f.endsWith('.sqlite') && f !== 'metadata.sqlite');
       if (sqliteFile) {
         const fullPath = path.join(wranglerDir, sqliteFile);
         const sqlite = new Database(fullPath);
-        return drizzle(sqlite, { schema });
+        return drizzleSqlite(sqlite, { schema });
       }
     }
   } catch (e) {
@@ -50,75 +60,79 @@ export function getDb() {
 }
 
 /**
- * Database fetchers: return database records directly; return empty array if not found.
+ * Database fetchers: return database records; fallback to static data if unavailable.
  */
 export async function fetchAllBoardMembers(): Promise<BoardMember[]> {
   const db = getDb();
-  if (!db) return [];
-
-  try {
-    const records = await db.select().from(schema.boardMembers).where(eq(schema.boardMembers.isActive, true));
-    return (records as unknown as BoardMember[]) || [];
-  } catch (err) {
-    console.warn('[D1] Board members query error:', err);
-    return [];
+  if (db) {
+    try {
+      const records = await db.select().from(schema.boardMembers).where(eq(schema.boardMembers.isActive, true));
+      if (records && records.length > 0) {
+        return records as unknown as BoardMember[];
+      }
+    } catch (err) {
+      console.warn('[D1] Board members query error, falling back to static data:', err);
+    }
   }
+  return BOARD_DATA;
 }
 
 export async function fetchAllEvents(): Promise<ClubEvent[]> {
   const db = getDb();
-  if (!db) return [];
-
-  try {
-    const records = await db.select().from(schema.events);
-    if (records && records.length > 0) {
-      return sortEventsDescending(records as unknown as ClubEvent[]);
+  if (db) {
+    try {
+      const records = await db.select().from(schema.events);
+      if (records && records.length > 0) {
+        return sortEventsDescending(records as unknown as ClubEvent[]);
+      }
+    } catch (err) {
+      console.warn('[D1] Events query error, falling back to static data:', err);
     }
-    return [];
-  } catch (err) {
-    console.warn('[D1] Events query error:', err);
-    return [];
   }
+  return sortEventsDescending(EVENTS_DATA);
 }
 
 export async function fetchAllGalleryItems(): Promise<GalleryItem[]> {
   const db = getDb();
-  if (!db) return [];
-
-  try {
-    const records = await db.select().from(schema.galleryItems);
-    return (records as unknown as GalleryItem[]) || [];
-  } catch (err) {
-    console.warn('[D1] Gallery items query error:', err);
-    return [];
+  if (db) {
+    try {
+      const records = await db.select().from(schema.galleryItems);
+      if (records && records.length > 0) {
+        return records as unknown as GalleryItem[];
+      }
+    } catch (err) {
+      console.warn('[D1] Gallery items query error, falling back to static data:', err);
+    }
   }
+  return GALLERY_ITEMS;
 }
 
 export async function fetchAllProjects(): Promise<ProjectRepository[]> {
   const db = getDb();
-  if (!db) return [];
-
-  try {
-    const records = await db.select().from(schema.projects);
-    return (records as unknown as ProjectRepository[]) || [];
-  } catch (err) {
-    console.warn('[D1] Projects query error:', err);
-    return [];
+  if (db) {
+    try {
+      const records = await db.select().from(schema.projects);
+      if (records && records.length > 0) {
+        return records as unknown as ProjectRepository[];
+      }
+    } catch (err) {
+      console.warn('[D1] Projects query error, falling back to static data:', err);
+    }
   }
+  return PROJECTS_DATA;
 }
 
 export async function fetchAllClubStats(): Promise<AboutStat[]> {
   const db = getDb();
-  if (!db) return [];
-
-  try {
-    const records = await db.select().from(schema.clubStats);
-    if (records && records.length > 0) {
-      return records.map((r) => ({ label: r.label, value: r.value }));
+  if (db) {
+    try {
+      const records = await db.select().from(schema.clubStats);
+      if (records && records.length > 0) {
+        return records.map((r) => ({ label: r.label, value: r.value }));
+      }
+    } catch (err) {
+      console.warn('[D1] Club stats query error, falling back to static data:', err);
     }
-    return [];
-  } catch (err) {
-    console.warn('[D1] Club stats query error:', err);
-    return [];
   }
+  return ABOUT_STATS;
 }

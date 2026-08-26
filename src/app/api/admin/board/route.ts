@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server';
 import { getAdminSessionFromRequest } from '@/lib/auth';
-import { getDb } from '@/lib/db';
+import { fetchAllBoardMembers, getDb } from '@/lib/db';
 import * as schema from '@/db/schema';
 import { eq } from 'drizzle-orm';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function GET(request: Request) {
   const session = await getAdminSessionFromRequest(request);
@@ -10,18 +13,12 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Unauthorized: Admin session required' }, { status: 401 });
   }
 
-  const db = getDb();
-  if (!db) {
-    return NextResponse.json({ members: [] });
-  }
-
-  try {
-    const records = await db.select().from(schema.boardMembers);
-    return NextResponse.json({ members: records || [] });
-  } catch (err) {
-    console.warn('D1 read failed:', err);
-    return NextResponse.json({ members: [] });
-  }
+  const members = await fetchAllBoardMembers();
+  return NextResponse.json({ members }, {
+    headers: {
+      'Cache-Control': 'no-store, max-age=0',
+    },
+  });
 }
 
 export async function POST(request: Request) {

@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server';
 import { getAdminSessionFromRequest } from '@/lib/auth';
-import { getDb } from '@/lib/db';
+import { fetchAllGalleryItems, getDb } from '@/lib/db';
 import * as schema from '@/db/schema';
 import { eq } from 'drizzle-orm';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function GET(request: Request) {
   const session = await getAdminSessionFromRequest(request);
@@ -10,18 +13,12 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Unauthorized: Admin session required' }, { status: 401 });
   }
 
-  const db = getDb();
-  if (!db) {
-    return NextResponse.json({ items: [] });
-  }
-
-  try {
-    const records = await db.select().from(schema.galleryItems);
-    return NextResponse.json({ items: records || [] });
-  } catch (err) {
-    console.warn('D1 gallery read failed:', err);
-    return NextResponse.json({ items: [] });
-  }
+  const items = await fetchAllGalleryItems();
+  return NextResponse.json({ items }, {
+    headers: {
+      'Cache-Control': 'no-store, max-age=0',
+    },
+  });
 }
 
 export async function POST(request: Request) {
@@ -54,8 +51,8 @@ export async function POST(request: Request) {
           category,
           tags: parsedTags,
           imageUrl: imageUrl.trim(),
-          width: width || 600,
-          height: height || 400,
+          width: width ? Number(width) : 600,
+          height: height ? Number(height) : 400,
           aspectClass: aspectClass || 'aspect-[3/2]',
         })
         .onConflictDoUpdate({
@@ -68,8 +65,8 @@ export async function POST(request: Request) {
             category,
             tags: parsedTags,
             imageUrl: imageUrl.trim(),
-            width: width || 600,
-            height: height || 400,
+            width: width ? Number(width) : 600,
+            height: height ? Number(height) : 400,
             aspectClass: aspectClass || 'aspect-[3/2]',
           },
         });
@@ -103,7 +100,7 @@ export async function DELETE(request: Request) {
 
     return NextResponse.json({ success: true, message: `Gallery item ${id} removed` });
   } catch (error) {
-    console.error('Delete gallery error:', error);
+    console.error('Delete gallery item error:', error);
     return NextResponse.json({ error: 'Failed to delete gallery item' }, { status: 500 });
   }
 }

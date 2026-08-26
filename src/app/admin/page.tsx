@@ -26,17 +26,29 @@ export default function AdminDashboardPage() {
 
   React.useEffect(() => {
     Promise.allSettled([
-      fetch("/api/admin/board").then((r) => r.json()),
-      fetch("/api/admin/events").then((r) => r.json()),
-      fetch("/api/admin/gallery").then((r) => r.json()),
-      fetch("/api/admin/projects").then((r) => r.json()),
+      fetch("/api/admin/board").then((r) => (r.ok ? r.json() : null)),
+      fetch("/api/admin/events").then((r) => (r.ok ? r.json() : null)),
+      fetch("/api/admin/gallery").then((r) => (r.ok ? r.json() : null)),
+      fetch("/api/admin/projects").then((r) => (r.ok ? r.json() : null)),
     ]).then(([boardRes, eventsRes, galleryRes, projectsRes]) => {
       setStats((prev) => ({
         ...prev,
-        boardMembersCount: boardRes.status === "fulfilled" && boardRes.value.members ? boardRes.value.members.length : prev.boardMembersCount,
-        eventsCount: eventsRes.status === "fulfilled" && eventsRes.value.events ? eventsRes.value.events.length : prev.eventsCount,
-        galleryItemsCount: galleryRes.status === "fulfilled" && galleryRes.value.items ? galleryRes.value.items.length : prev.galleryItemsCount,
-        projectsCount: projectsRes.status === "fulfilled" && projectsRes.value.projects ? projectsRes.value.projects.length : prev.projectsCount,
+        boardMembersCount:
+          boardRes.status === "fulfilled" && boardRes.value?.members && Array.isArray(boardRes.value.members) && boardRes.value.members.length > 0
+            ? boardRes.value.members.length
+            : prev.boardMembersCount,
+        eventsCount:
+          eventsRes.status === "fulfilled" && eventsRes.value?.events && Array.isArray(eventsRes.value.events) && eventsRes.value.events.length > 0
+            ? eventsRes.value.events.length
+            : prev.eventsCount,
+        galleryItemsCount:
+          galleryRes.status === "fulfilled" && galleryRes.value?.items && Array.isArray(galleryRes.value.items) && galleryRes.value.items.length > 0
+            ? galleryRes.value.items.length
+            : prev.galleryItemsCount,
+        projectsCount:
+          projectsRes.status === "fulfilled" && projectsRes.value?.projects && Array.isArray(projectsRes.value.projects) && projectsRes.value.projects.length > 0
+            ? projectsRes.value.projects.length
+            : prev.projectsCount,
       }));
     });
   }, []);

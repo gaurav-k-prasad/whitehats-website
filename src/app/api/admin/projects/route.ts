@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server';
 import { getAdminSessionFromRequest } from '@/lib/auth';
-import { getDb } from '@/lib/db';
+import { fetchAllProjects, getDb } from '@/lib/db';
 import * as schema from '@/db/schema';
 import { eq } from 'drizzle-orm';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function GET(request: Request) {
   const session = await getAdminSessionFromRequest(request);
@@ -10,18 +13,12 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Unauthorized: Admin session required' }, { status: 401 });
   }
 
-  const db = getDb();
-  if (!db) {
-    return NextResponse.json({ projects: [] });
-  }
-
-  try {
-    const records = await db.select().from(schema.projects);
-    return NextResponse.json({ projects: records || [] });
-  } catch (err) {
-    console.warn('D1 projects read failed:', err);
-    return NextResponse.json({ projects: [] });
-  }
+  const projects = await fetchAllProjects();
+  return NextResponse.json({ projects }, {
+    headers: {
+      'Cache-Control': 'no-store, max-age=0',
+    },
+  });
 }
 
 export async function POST(request: Request) {
@@ -32,15 +29,15 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { id, name, visibility, status, description, iconType, techStack, contributors, githubUrl, liveDemoUrl } = body;
+    const { id, slug, name, visibility, status, description, iconType, techStack, contributors, githubUrl, liveDemoUrl } = body;
 
-    if (!name || !status || !githubUrl) {
-      return NextResponse.json({ error: 'Name, status, and githubUrl are required' }, { status: 400 });
+    if (!name || !description || !githubUrl) {
+      return NextResponse.json({ error: 'Name, description, and githubUrl are required' }, { status: 400 });
     }
 
-    const projectId = id || (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `project-${Date.now()}`);
-    const slug = projectId;
-    const parsedTech = Array.isArray(techStack) ? techStack : typeof techStack === 'string' ? techStack.split(',').map((t: string) => t.trim()) : [];
+    const projectId = id || (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `proj-${Date.now()}`);
+    const projectSlug = slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    const parsedTechStack = Array.isArray(techStack) ? techStack : typeof techStack === 'string' ? techStack.split(',').map((t: string) => t.trim()) : [];
 
     const db = getDb();
     if (db) {
@@ -48,13 +45,13 @@ export async function POST(request: Request) {
         .insert(schema.projects)
         .values({
           id: projectId,
-          slug,
+          slug: projectSlug,
           name: name.trim(),
           visibility: visibility || 'Public',
-          status,
-          description: description || '',
+          status: status || 'ACTIVE_DEVELOPMENT',
+          description: description.trim(),
           iconType: iconType || 'terminal',
-          techStack: parsedTech,
+          techStack: parsedTechStack,
           contributors: contributors ? Number(contributors) : 1,
           githubUrl: githubUrl.trim(),
           liveDemoUrl: liveDemoUrl ? liveDemoUrl.trim() : null,
@@ -62,12 +59,13 @@ export async function POST(request: Request) {
         .onConflictDoUpdate({
           target: schema.projects.id,
           set: {
+            slug: projectSlug,
             name: name.trim(),
             visibility: visibility || 'Public',
-            status,
-            description: description || '',
+            status: status || 'ACTIVE_DEVELOPMENT',
+            description: description.trim(),
             iconType: iconType || 'terminal',
-            techStack: parsedTech,
+            techStack: parsedTechStack,
             contributors: contributors ? Number(contributors) : 1,
             githubUrl: githubUrl.trim(),
             liveDemoUrl: liveDemoUrl ? liveDemoUrl.trim() : null,
@@ -78,7 +76,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, project: { id: projectId, name, status } });
   } catch (error) {
     console.error('Save project error:', error);
-    return NextResponse.json({ error: 'Failed to save project repository' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to save project' }, { status: 500 });
   }
 }
 

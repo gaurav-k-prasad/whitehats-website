@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server';
 import { getAdminSessionFromRequest } from '@/lib/auth';
-import { getDb } from '@/lib/db';
+import { fetchAllEvents, getDb } from '@/lib/db';
 import * as schema from '@/db/schema';
 import { eq } from 'drizzle-orm';
-import { sortEventsDescending, ClubEvent } from '@/data/eventsData';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function GET(request: Request) {
   const session = await getAdminSessionFromRequest(request);
@@ -11,18 +13,12 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Unauthorized: Admin session required' }, { status: 401 });
   }
 
-  const db = getDb();
-  if (!db) {
-    return NextResponse.json({ events: [] });
-  }
-
-  try {
-    const records = await db.select().from(schema.events);
-    return NextResponse.json({ events: sortEventsDescending((records as unknown as ClubEvent[]) || []) });
-  } catch (err) {
-    console.warn('D1 events read failed:', err);
-    return NextResponse.json({ events: [] });
-  }
+  const events = await fetchAllEvents();
+  return NextResponse.json({ events }, {
+    headers: {
+      'Cache-Control': 'no-store, max-age=0',
+    },
+  });
 }
 
 export async function POST(request: Request) {
