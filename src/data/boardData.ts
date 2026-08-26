@@ -4,6 +4,8 @@ export interface BoardMember {
   role: string;
   category: 'Core Leadership' | 'Vice Leadership' | 'Domain Heads';
   imageUrl: string;
+  bio?: string;
+  isActive?: boolean;
 }
 
 export const BOARD_DATA: BoardMember[] = [

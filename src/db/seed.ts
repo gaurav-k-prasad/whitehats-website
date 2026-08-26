@@ -33,9 +33,10 @@ VALUES ('${m.id}', '${m.name.replace(/'/g, "''")}', '${m.role.replace(/'/g, "''"
   const sortedEvents = sortEventsDescending(EVENTS_DATA);
   for (const e of sortedEvents) {
     const tagsJson = JSON.stringify(e.tags).replace(/'/g, "''");
+    const highlightsJson = e.highlights ? JSON.stringify(e.highlights).replace(/'/g, "''") : 'NULL';
     statements.push(`
-INSERT INTO events (id, title, type, status, date, time, location, description, tags, image_url, registration_url)
-VALUES ('${e.id}', '${e.title.replace(/'/g, "''")}', '${e.type}', 'UPCOMING', '${e.date}', '${e.time}', '${e.location.replace(/'/g, "''")}', '${e.description.replace(/'/g, "''")}', '${tagsJson}', ${e.imageUrl ? `'${e.imageUrl}'` : 'NULL'}, ${e.registrationUrl ? `'${e.registrationUrl}'` : 'NULL'});
+INSERT INTO events (id, title, type, status, date, time, location, mode, description, tags, highlights, image_url, registration_url)
+VALUES ('${e.id}', '${e.title.replace(/'/g, "''")}', '${e.type}', 'UPCOMING', '${e.date}', '${e.time}', '${e.location.replace(/'/g, "''")}', ${e.mode ? `'${e.mode}'` : 'NULL'}, '${e.description.replace(/'/g, "''")}', '${tagsJson}', ${highlightsJson !== 'NULL' ? `'${highlightsJson}'` : 'NULL'}, ${e.imageUrl ? `'${e.imageUrl}'` : 'NULL'}, ${e.registrationUrl ? `'${e.registrationUrl}'` : 'NULL'});
 `);
   }
 

@@ -7,12 +7,14 @@ interface MagneticButtonProps {
   children: React.ReactNode;
   className?: string;
   strength?: number;
+  onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
 }
 
 export default function MagneticButton({
   children,
   className = "",
   strength = 24,
+  onClick,
 }: MagneticButtonProps) {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -48,6 +50,7 @@ export default function MagneticButton({
   return (
     <motion.div
       ref={ref}
+      onClick={onClick}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       style={{ x: springX, y: springY }}

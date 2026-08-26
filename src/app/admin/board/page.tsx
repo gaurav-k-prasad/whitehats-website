@@ -7,12 +7,14 @@ import CipherReveal from "@/components/ui/CipherReveal";
 import MagneticButton from "@/components/ui/MagneticButton";
 import { BoardMember } from "@/data/boardData";
 import { CloudinaryImage } from "@/components/ui/cloudinary";
+import ImageUploadPicker from "@/components/admin/ImageUploadPicker";
 
 export default function AdminBoardPage() {
   const [members, setMembers] = useState<BoardMember[]>([]);
   const [isFetching, setIsFetching] = useState(true);
   const [loading, setLoading] = useState(false);
   const [editingMember, setEditingMember] = useState<BoardMember | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isNew, setIsNew] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
 
@@ -45,8 +47,19 @@ export default function AdminBoardPage() {
     };
   }, []);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setEditingMember(null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   const handleOpenAdd = () => {
     setIsNew(true);
+    setSelectedFile(null);
     setEditingMember({
       id: typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `board-${Date.now()}`,
       name: "",
@@ -56,23 +69,53 @@ export default function AdminBoardPage() {
     });
   };
 
+  const handleOpenEdit = (member: BoardMember) => {
+    setIsNew(false);
+    setSelectedFile(null);
+    setEditingMember(member);
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingMember) return;
 
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/board", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(editingMember),
-      });
+      let res: Response;
+
+      if (selectedFile) {
+        // Send as multipart/form-data for direct file upload with transactional rollback
+        const formData = new FormData();
+        formData.append("id", editingMember.id);
+        formData.append("name", editingMember.name);
+        formData.append("role", editingMember.role);
+        formData.append("category", editingMember.category);
+        if (editingMember.bio) formData.append("bio", editingMember.bio);
+        formData.append("isActive", String(editingMember.isActive !== false));
+        formData.append("imageFile", selectedFile);
+
+        res = await fetch("/api/admin/board", {
+          method: "POST",
+          body: formData,
+        });
+      } else {
+        // Send as JSON
+        res = await fetch("/api/admin/board", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(editingMember),
+        });
+      }
 
       if (res.ok) {
         setFeedback(`Saved operator: ${editingMember.name}`);
         setEditingMember(null);
+        setSelectedFile(null);
         refreshMembers();
         setTimeout(() => setFeedback(null), 3000);
+      } else {
+        const data = await res.json();
+        setFeedback(data.error || "Failed to save changes.");
       }
     } catch {
       setFeedback("Failed to save changes.");
@@ -95,130 +138,118 @@ export default function AdminBoardPage() {
         setTimeout(() => setFeedback(null), 3000);
       }
     } catch {
-      setFeedback("Failed to remove operator.");
+      setFeedback("Failed to delete member.");
     }
   };
-
-  const categories: Array<BoardMember["category"]> = [
-    "Core Leadership",
-    "Vice Leadership",
-    "Domain Heads",
-  ];
 
   return (
     <div className="flex flex-col gap-8">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#1E293B] pb-6">
         <div>
-          <div className="flex items-center gap-2 font-mono text-xs text-cyber-blue tracking-widest uppercase">
-            <span className="w-2 h-2 rounded-full bg-cyber-blue animate-pulse" />
-            <CipherReveal text="// DIRECTORY REGISTRY" duration={400} />
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-mono font-bold text-white mt-1">
-            BOARD MEMBERS MANAGER
+          <h1 className="text-2xl font-black font-mono tracking-wider uppercase text-white flex items-center gap-3">
+            <CipherReveal text="// BOARD ROSTER DIRECTORY" duration={400} />
           </h1>
-          <p className="text-xs sm:text-sm font-mono text-slate-400 mt-1">
-            Configure executive council and domain specialists synchronized with Cloudflare D1.
+          <p className="text-xs font-mono text-slate-400 mt-1">
+            Manage WhiteHats Core Leadership, Vice Leadership, and Domain Heads.
           </p>
         </div>
 
-        <MagneticButton>
-          <button
-            onClick={handleOpenAdd}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-cyber-blue text-black font-mono text-xs font-bold hover:bg-cyber-blue-light shadow-neon-blue transition-all"
-          >
-            <Plus className="w-4 h-4" />
-            <span>REGISTER OPERATOR</span>
-          </button>
-        </MagneticButton>
+        <button
+          type="button"
+          onClick={handleOpenAdd}
+          className="relative group px-4 py-2.5 rounded-lg bg-cyber-blue text-black font-mono text-xs font-bold shadow-[0_0_15px_rgba(0,136,255,0.35)] hover:shadow-[0_0_25px_rgba(0,136,255,0.6)] inline-flex items-center gap-2 hover:bg-cyber-blue-light transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] cursor-pointer whitespace-nowrap self-start sm:self-auto"
+        >
+          <Plus className="w-4 h-4 transition-transform duration-200 group-hover:rotate-90" />
+          <span>ADD OPERATOR</span>
+        </button>
       </div>
 
       {feedback && (
-        <div className="flex items-center gap-2 p-3 rounded-lg border border-cyber-blue/30 bg-cyber-blue/10 text-cyber-blue-light font-mono text-xs">
-          <AlertCircle className="w-4 h-4" />
+        <div className="p-3.5 rounded-lg bg-[#0B1120] border border-cyber-blue/40 text-cyber-blue font-mono text-xs flex items-center gap-2.5 animate-fade-in shadow-neon-blue">
+          <AlertCircle className="w-4 h-4 shrink-0" />
           <span>{feedback}</span>
         </div>
       )}
 
-      {/* Categories Grouping */}
+      {/* Grid */}
       {isFetching ? (
-        <div className="py-24 flex flex-col items-center justify-center text-center font-mono text-slate-400 gap-3 border border-dashed border-[#1E293B] rounded-xl bg-[#0B1120]/40">
+        <div className="w-full py-20 flex flex-col items-center justify-center gap-3 font-mono text-xs text-cyber-blue border border-dashed border-[#1E293B] rounded-xl bg-[#0B1120]/40">
           <div className="w-8 h-8 rounded-full border-2 border-cyber-blue border-t-transparent animate-spin" />
-          <p className="text-xs tracking-wider text-cyber-blue font-bold uppercase animate-pulse">
-            {"// SYNCHRONIZING BOARD OPERATORS DIRECTORY..."}
-          </p>
+          <span className="tracking-widest uppercase">READING ROSTER FROM DATABASE...</span>
         </div>
       ) : members.length === 0 ? (
-        <div className="py-16 flex flex-col items-center justify-center text-center font-mono text-slate-500 gap-2 border border-dashed border-[#1E293B] rounded-xl">
-          <Shield className="w-8 h-8 opacity-40 text-cyber-blue" />
-          <p className="text-sm">No board operators registered in database.</p>
+        <div className="w-full py-16 text-center border border-dashed border-[#1E293B] rounded-xl bg-[#0B1120]/30 font-mono text-xs text-slate-500">
+          NO OPERATORS CURRENTLY LOGGED IN DATABASE
         </div>
       ) : (
-        categories.map((category) => {
-          const categoryMembers = members.filter((m) => m.category === category);
-
-          return (
-            <div key={category} className="flex flex-col gap-4">
-              <div className="flex items-center justify-between border-b border-card-border/60 pb-2">
-                <h2 className="font-mono text-xs sm:text-sm font-bold text-cyber-blue tracking-wider uppercase flex items-center gap-2">
-                  <Shield className="w-3.5 h-3.5" />
-                  <span>{"//"} {category} ({categoryMembers.length})</span>
-                </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {members.map((member) => (
+            <CyberCardBorder key={member.id} contentClassName="p-4 flex flex-col justify-between gap-3">
+              <div className="flex items-start gap-3.5">
+                <div className="relative w-14 h-14 rounded-lg overflow-hidden bg-[#070D1D] shrink-0 border border-[#1E293B]">
+                  <CloudinaryImage
+                    src={member.imageUrl}
+                    alt={member.name}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-[#030712] border border-[#1E293B] text-cyber-blue truncate">
+                      {member.category}
+                    </span>
+                  </div>
+                  <h3 className="font-mono font-bold text-white text-sm truncate mt-1">
+                    {member.name}
+                  </h3>
+                  <p className="text-xs font-mono text-slate-400 truncate">
+                    {member.role}
+                  </p>
+                </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {categoryMembers.map((member) => (
-                  <CyberCardBorder key={member.id} contentClassName="p-4 flex flex-col justify-between gap-4">
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <div className="flex items-center gap-2 font-mono text-[10px] text-cyber-blue-light font-bold">
-                          <span className="text-slate-400 truncate max-w-[180px]">{member.imageUrl || "No Image"}</span>
-                        </div>
-                        <h3 className="font-mono font-bold text-white text-base mt-1.5">
-                          {member.name}
-                        </h3>
-                        <p className="font-mono text-xs text-cyber-blue font-semibold">
-                          &gt; {member.role}
-                        </p>
-                      </div>
-
-                      <div className="flex items-center gap-1 shrink-0">
-                        <button
-                          onClick={() => {
-                            setIsNew(false);
-                            setEditingMember(member);
-                          }}
-                          aria-label="Edit operator"
-                          className="p-1.5 rounded-md border border-[#1E293B] hover:border-cyber-blue/60 bg-[#0B1120] text-slate-300 hover:text-white transition-colors"
-                        >
-                          <Edit2 className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(member.id, member.name)}
-                          aria-label="Delete operator"
-                          className="p-1.5 rounded-md border border-red-500/20 hover:border-red-500/60 bg-red-500/5 text-red-400 hover:text-red-300 transition-colors"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </div>
-                  </CyberCardBorder>
-                ))}
+              <div className="flex items-center justify-between pt-2.5 border-t border-card-border/60 text-xs font-mono text-slate-400">
+                <span className="truncate max-w-[150px] text-[10px]">
+                  {member.imageUrl}
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => handleOpenEdit(member)}
+                    className="p-1.5 rounded-md border border-[#1E293B] hover:border-cyber-blue/60 bg-[#0B1120] text-slate-300 hover:text-white transition-colors cursor-pointer"
+                    title="Edit Operator"
+                  >
+                    <Edit2 className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(member.id, member.name)}
+                    className="p-1.5 rounded-md border border-red-500/20 hover:border-red-500/60 bg-red-500/5 text-red-400 hover:text-red-300 transition-colors cursor-pointer"
+                    title="Delete Operator"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
-            </div>
-          );
-        })
+            </CyberCardBorder>
+          ))}
+        </div>
       )}
 
       {/* Edit / Add Modal */}
       {editingMember && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="w-full max-w-lg">
+        <div
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setEditingMember(null);
+          }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+        >
+          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <CyberCardBorder contentClassName="p-6 flex flex-col gap-5">
               <div className="flex items-center justify-between border-b border-[#1E293B] pb-3">
                 <div className="flex items-center gap-2 font-mono text-sm font-bold text-white">
                   <Shield className="w-4 h-4 text-cyber-blue" />
-                  <span>{isNew ? "REGISTER NEW OPERATOR" : `EDIT: ${editingMember.name}`}</span>
+                  <span>{isNew ? "ADD BOARD OPERATOR" : `EDIT: ${editingMember.name}`}</span>
                 </div>
                 <button
                   onClick={() => setEditingMember(null)}
@@ -275,53 +306,39 @@ export default function AdminBoardPage() {
                   />
                 </div>
 
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-mono text-slate-300">
-                    IMAGE ASSET
-                  </label>
-                  <input
-                    type="text"
-                    value={editingMember.imageUrl}
-                    onChange={(e) =>
-                      setEditingMember({ ...editingMember, imageUrl: e.target.value })
-                    }
-                    placeholder="e.g. gaurav or https://..."
-                    className="w-full rounded-md bg-[#030712] border border-[#1E293B] px-3 py-2 text-xs font-mono text-white outline-none focus:border-cyber-blue"
-                  />
-                </div>
-
-                {editingMember.imageUrl && editingMember.imageUrl.trim().length > 0 && (
-                  <div className="p-2.5 rounded bg-[#030712] border border-[#1E293B] flex items-center gap-3 overflow-hidden">
-                    <div className="relative w-16 h-16 rounded overflow-hidden bg-[#070D1D] shrink-0 border border-[#1E293B]">
-                      <CloudinaryImage
-                        src={editingMember.imageUrl}
-                        alt="Preview"
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <div className="font-mono text-xs text-slate-400 min-w-0 flex-1 overflow-hidden">
-                      <span className="text-cyber-blue text-[10px] block font-bold tracking-wider uppercase">OPERATOR AVATAR PREVIEW</span>
-                      <p className="truncate text-white text-xs block max-w-full font-mono">{editingMember.imageUrl}</p>
-                    </div>
-                  </div>
-                )}
+                {/* Direct Image Upload / Manual Input Component */}
+                <ImageUploadPicker
+                  label="OPERATOR AVATAR"
+                  folderHint="whitehats/board"
+                  value={editingMember.imageUrl}
+                  onChangeValue={(val) =>
+                    setEditingMember({ ...editingMember, imageUrl: val })
+                  }
+                  selectedFile={selectedFile}
+                  onSelectFile={setSelectedFile}
+                />
 
                 <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#1E293B]">
                   <button
                     type="button"
                     onClick={() => setEditingMember(null)}
-                    className="px-3.5 py-2 rounded-md border border-[#1E293B] text-slate-400 hover:text-white font-mono text-xs"
+                    className="px-3.5 py-2 rounded-md border border-[#1E293B] text-slate-400 hover:text-white font-mono text-xs cursor-pointer"
                   >
                     CANCEL
                   </button>
                   <button
                     type="submit"
                     disabled={loading}
-                    className="px-4 py-2 rounded-md bg-cyber-blue text-black font-mono text-xs font-bold hover:bg-cyber-blue-light flex items-center gap-1.5"
+                    className="px-4 py-2 rounded-md bg-cyber-blue text-black font-mono text-xs font-bold hover:bg-cyber-blue-light flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                   >
-                    <Save className="w-3.5 h-3.5" />
-                    <span>{loading ? "SAVING..." : "COMMIT CHANGES"}</span>
+                    {loading ? (
+                      <span className="animate-pulse">SAVING & UPLOADING...</span>
+                    ) : (
+                      <>
+                        <Save className="w-3.5 h-3.5" />
+                        <span>SAVE OPERATOR</span>
+                      </>
+                    )}
                   </button>
                 </div>
               </form>

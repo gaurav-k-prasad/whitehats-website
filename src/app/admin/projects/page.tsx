@@ -15,6 +15,7 @@ export default function AdminProjectsPage() {
   const [editingProject, setEditingProject] = useState<ProjectRepository | null>(null);
   const [isNew, setIsNew] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [techStackInput, setTechStackInput] = useState("");
 
   const refreshProjects = () => {
     fetch("/api/admin/projects")
@@ -45,8 +46,19 @@ export default function AdminProjectsPage() {
     };
   }, []);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setEditingProject(null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   const handleOpenAdd = () => {
     setIsNew(true);
+    setTechStackInput("Python, Security");
     setEditingProject({
       id: typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `project-${Date.now()}`,
       name: "",
@@ -60,26 +72,42 @@ export default function AdminProjectsPage() {
     });
   };
 
+  const handleOpenEdit = (project: ProjectRepository) => {
+    setIsNew(false);
+    setTechStackInput((project.techStack || []).join(", "));
+    setEditingProject(project);
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingProject) return;
 
     setLoading(true);
     try {
+      const parsedTechStack = techStackInput
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+
+      const payload = {
+        ...editingProject,
+        techStack: parsedTechStack,
+      };
+
       const res = await fetch("/api/admin/projects", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(editingProject),
+        body: JSON.stringify(payload),
       });
 
       if (res.ok) {
-        setFeedback(`Saved repository: ${editingProject.name}`);
+        setFeedback(`Saved project: ${editingProject.name}`);
         setEditingProject(null);
         refreshProjects();
         setTimeout(() => setFeedback(null), 3000);
       }
     } catch {
-      setFeedback("Failed to save project repository.");
+      setFeedback("Failed to save project.");
     } finally {
       setLoading(false);
     }
@@ -128,15 +156,14 @@ export default function AdminProjectsPage() {
           </p>
         </div>
 
-        <MagneticButton>
-          <button
-            onClick={handleOpenAdd}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-cyber-blue text-black font-mono text-xs font-bold hover:bg-cyber-blue-light shadow-neon-blue transition-all"
-          >
-            <Plus className="w-4 h-4" />
-            <span>DEPLOY REPOSITORY</span>
-          </button>
-        </MagneticButton>
+        <button
+          type="button"
+          onClick={handleOpenAdd}
+          className="relative group px-4 py-2.5 rounded-lg bg-cyber-blue text-black font-mono text-xs font-bold shadow-[0_0_15px_rgba(0,136,255,0.35)] hover:shadow-[0_0_25px_rgba(0,136,255,0.6)] inline-flex items-center gap-2 hover:bg-cyber-blue-light transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] cursor-pointer whitespace-nowrap self-start sm:self-auto"
+        >
+          <Plus className="w-4 h-4 transition-transform duration-200 group-hover:rotate-90" />
+          <span>DEPLOY REPOSITORY</span>
+        </button>
       </div>
 
       {feedback && (
@@ -179,10 +206,7 @@ export default function AdminProjectsPage() {
 
                   <div className="flex items-center gap-1 shrink-0">
                     <button
-                      onClick={() => {
-                        setIsNew(false);
-                        setEditingProject(project);
-                      }}
+                      onClick={() => handleOpenEdit(project)}
                       className="p-1.5 rounded-md border border-[#1E293B] hover:border-cyber-blue/60 bg-[#0B1120] text-slate-300 hover:text-white"
                     >
                       <Edit2 className="w-3.5 h-3.5" />
@@ -231,7 +255,12 @@ export default function AdminProjectsPage() {
 
       {/* Edit Modal */}
       {editingProject && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setEditingProject(null);
+          }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+        >
           <div className="w-full max-w-xl max-h-[90vh] overflow-y-auto">
             <CyberCardBorder contentClassName="p-6 flex flex-col gap-5">
               <div className="flex items-center justify-between border-b border-[#1E293B] pb-3">
@@ -350,13 +379,8 @@ export default function AdminProjectsPage() {
                   <label className="text-xs font-mono text-slate-300">TECH STACK (COMMA SEPARATED)</label>
                   <input
                     type="text"
-                    value={editingProject.techStack.join(", ")}
-                    onChange={(e) =>
-                      setEditingProject({
-                        ...editingProject,
-                        techStack: e.target.value.split(",").map((s) => s.trim()).filter(Boolean),
-                      })
-                    }
+                    value={techStackInput}
+                    onChange={(e) => setTechStackInput(e.target.value)}
                     placeholder="Python, Cryptography, FastAPI"
                     className="w-full rounded-md bg-[#030712] border border-[#1E293B] px-3 py-2 text-xs font-mono text-white outline-none focus:border-cyber-blue"
                   />

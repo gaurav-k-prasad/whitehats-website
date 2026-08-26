@@ -6,14 +6,15 @@ import { ClubEvent, sortEventsDescending } from "@/data/eventsData";
 import EventCard from "./EventCard";
 import CipherReveal from "@/components/ui/CipherReveal";
 
-type EventFilterType = "All" | "CTF" | "Workshop" | "Seminar" | "Bootcamp";
+type EventFilterType = "All" | "Hackathon" | "CTF" | "Workshop" | "Seminar" | "Bootcamp";
 
 const FILTER_OPTIONS: { label: string; value: EventFilterType }[] = [
   { label: "All Events", value: "All" },
-  { label: "CTF", value: "CTF" },
-  { label: "Workshop", value: "Workshop" },
-  { label: "Seminar", value: "Seminar" },
-  { label: "Bootcamp", value: "Bootcamp" },
+  { label: "Hackathons", value: "Hackathon" },
+  { label: "CTFs", value: "CTF" },
+  { label: "Workshops", value: "Workshop" },
+  { label: "Seminars", value: "Seminar" },
+  { label: "Bootcamps", value: "Bootcamp" },
 ];
 
 interface EventsGridProps {

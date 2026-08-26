@@ -72,6 +72,13 @@ function useDecryptingText(originalText: string, isTriggered: boolean) {
 
 function renderTypeBadge(type: ClubEvent["type"]) {
   switch (type) {
+    case "Hackathon":
+      return (
+        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-wider uppercase border border-amber-500/40 bg-amber-500/10 text-amber-300 flex items-center gap-1.5 shadow-sm">
+          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse shadow-[0_0_8px_#fbbf24]" />
+          HACKATHON
+        </span>
+      );
     case "CTF":
       return (
         <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-wider uppercase border border-red-500/40 bg-red-500/10 text-red-400 flex items-center gap-1.5 shadow-sm">

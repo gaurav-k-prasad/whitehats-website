@@ -8,6 +8,13 @@
       "when": 1787753311033,
       "tag": "0000_deep_legion",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1787767104483,
+      "tag": "0001_soft_selene",
+      "breakpoints": true
     }
   ]
 }

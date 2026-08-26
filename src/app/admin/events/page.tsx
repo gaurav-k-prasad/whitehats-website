@@ -1,20 +1,24 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Plus, Edit2, Trash2, Calendar, MapPin, Clock, X, Save, AlertCircle, Image as ImageIcon, Link as LinkIcon } from "lucide-react";
+import { Plus, Edit2, Trash2, Calendar, MapPin, Clock, X, Save, AlertCircle, Image as ImageIcon, Link as LinkIcon, Radio, Globe } from "lucide-react";
 import CyberCardBorder from "@/components/ui/CyberCardBorder";
 import CipherReveal from "@/components/ui/CipherReveal";
 import MagneticButton from "@/components/ui/MagneticButton";
 import { ClubEvent, formatEventDisplayDate, sortEventsDescending } from "@/data/eventsData";
 import { CloudinaryImage } from "@/components/ui/cloudinary";
+import ImageUploadPicker from "@/components/admin/ImageUploadPicker";
 
 export default function AdminEventsPage() {
   const [events, setEvents] = useState<ClubEvent[]>([]);
   const [isFetching, setIsFetching] = useState(true);
   const [loading, setLoading] = useState(false);
   const [editingEvent, setEditingEvent] = useState<ClubEvent | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isNew, setIsNew] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [tagsInput, setTagsInput] = useState("");
+  const [highlightsInput, setHighlightsInput] = useState("");
 
   const refreshEvents = () => {
     fetch("/api/admin/events")
@@ -45,17 +49,32 @@ export default function AdminEventsPage() {
     };
   }, []);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setEditingEvent(null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   const handleOpenAdd = () => {
     setIsNew(true);
+    setSelectedFile(null);
+    setTagsInput("Security, Hands-On");
+    setHighlightsInput("");
     setEditingEvent({
       id: typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `event-${Date.now()}`,
       title: "",
-      type: "Workshop",
+      type: "Hackathon",
       date: new Date().toISOString().split("T")[0],
       time: "01:00 PM - 05:00 PM",
       location: "VIT Vellore",
+      mode: "In-Person",
       description: "",
       tags: ["Security", "Hands-On"],
+      highlights: [],
       imageUrl: "",
       registrationUrl: "",
     });
@@ -63,8 +82,13 @@ export default function AdminEventsPage() {
 
   const handleOpenEdit = (event: ClubEvent) => {
     setIsNew(false);
+    setSelectedFile(null);
+    setTagsInput((event.tags || []).join(", "));
+    setHighlightsInput((event.highlights || []).join("\n"));
     setEditingEvent({
       ...event,
+      mode: event.mode || "In-Person",
+      highlights: event.highlights || [],
       imageUrl: event.imageUrl || "",
       registrationUrl: event.registrationUrl || "",
     });
@@ -76,21 +100,59 @@ export default function AdminEventsPage() {
 
     setLoading(true);
     try {
-      const payload = {
-        ...editingEvent,
-        imageUrl: editingEvent.imageUrl?.trim() || null,
-        registrationUrl: editingEvent.registrationUrl?.trim() || null,
-      };
+      const parsedTags = tagsInput
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+      const parsedHighlights = highlightsInput
+        .split("\n")
+        .map((s) => s.trim())
+        .filter(Boolean);
 
-      const res = await fetch("/api/admin/events", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      let res: Response;
+
+      if (selectedFile) {
+        // Send multipart/form-data for direct file upload with transactional rollback
+        const formData = new FormData();
+        formData.append("id", editingEvent.id);
+        formData.append("title", editingEvent.title);
+        formData.append("type", editingEvent.type);
+        formData.append("status", editingEvent.status || "UPCOMING");
+        formData.append("date", editingEvent.date);
+        formData.append("time", editingEvent.time);
+        formData.append("location", editingEvent.location);
+        if (editingEvent.mode) formData.append("mode", editingEvent.mode);
+        formData.append("description", editingEvent.description);
+        formData.append("tags", parsedTags.join(", "));
+        formData.append("highlights", parsedHighlights.join("\n"));
+        if (editingEvent.registrationUrl) formData.append("registrationUrl", editingEvent.registrationUrl);
+        formData.append("imageFile", selectedFile);
+
+        res = await fetch("/api/admin/events", {
+          method: "POST",
+          body: formData,
+        });
+      } else {
+        // Send JSON payload
+        const payload = {
+          ...editingEvent,
+          tags: parsedTags,
+          highlights: parsedHighlights,
+          imageUrl: editingEvent.imageUrl?.trim() || null,
+          registrationUrl: editingEvent.registrationUrl?.trim() || null,
+        };
+
+        res = await fetch("/api/admin/events", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+      }
 
       if (res.ok) {
         setFeedback(`Saved event: ${editingEvent.title}`);
         setEditingEvent(null);
+        setSelectedFile(null);
         refreshEvents();
         setTimeout(() => setFeedback(null), 3000);
       } else {
@@ -113,7 +175,7 @@ export default function AdminEventsPage() {
       });
 
       if (res.ok) {
-        setFeedback(`Event ${title} removed.`);
+        setFeedback(`Event "${title}" removed.`);
         refreshEvents();
         setTimeout(() => setFeedback(null), 3000);
       }
@@ -127,122 +189,100 @@ export default function AdminEventsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#1E293B] pb-6">
         <div>
-          <div className="flex items-center gap-2 font-mono text-xs text-cyber-blue tracking-widest uppercase">
-            <span className="w-2 h-2 rounded-full bg-cyber-blue animate-pulse" />
-            <CipherReveal text="// TIMELINE DIRECTIVES" duration={400} />
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-mono font-bold text-white mt-1">
-            EVENTS & WORKSHOPS MANAGER
+          <h1 className="text-2xl font-black font-mono tracking-wider uppercase text-white flex items-center gap-3">
+            <CipherReveal text="// OPERATIONS & EVENTS MANAGER" duration={400} />
           </h1>
-          <p className="text-xs sm:text-sm font-mono text-slate-400 mt-1">
-            Schedule CTFs, bootcamps, and technical sessions synchronized with Cloudflare D1.
+          <p className="text-xs font-mono text-slate-400 mt-1">
+            Schedule hackathons, workshops, CTFs, seminars, and bootcamps.
           </p>
         </div>
 
-        <MagneticButton>
-          <button
-            onClick={handleOpenAdd}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-cyber-blue text-black font-mono text-xs font-bold hover:bg-cyber-blue-light shadow-neon-blue transition-all cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            <span>SCHEDULE EVENT</span>
-          </button>
-        </MagneticButton>
+        <button
+          type="button"
+          onClick={handleOpenAdd}
+          className="relative group px-4 py-2.5 rounded-lg bg-cyber-blue text-black font-mono text-xs font-bold shadow-[0_0_15px_rgba(0,136,255,0.35)] hover:shadow-[0_0_25px_rgba(0,136,255,0.6)] inline-flex items-center gap-2 hover:bg-cyber-blue-light transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] cursor-pointer whitespace-nowrap self-start sm:self-auto"
+        >
+          <Plus className="w-4 h-4 transition-transform duration-200 group-hover:rotate-90" />
+          <span>NEW OPERATION</span>
+        </button>
       </div>
 
       {feedback && (
-        <div className="flex items-center gap-2 p-3 rounded-lg border border-cyber-blue/30 bg-cyber-blue/10 text-cyber-blue-light font-mono text-xs">
-          <AlertCircle className="w-4 h-4" />
+        <div className="p-3.5 rounded-lg bg-[#0B1120] border border-cyber-blue/40 text-cyber-blue font-mono text-xs flex items-center gap-2.5 animate-fade-in shadow-neon-blue">
+          <AlertCircle className="w-4 h-4 shrink-0" />
           <span>{feedback}</span>
         </div>
       )}
 
-      {/* Events Grid */}
+      {/* Grid */}
       {isFetching ? (
-        <div className="py-24 flex flex-col items-center justify-center text-center font-mono text-slate-400 gap-3 border border-dashed border-[#1E293B] rounded-xl bg-[#0B1120]/40">
+        <div className="w-full py-20 flex flex-col items-center justify-center gap-3 font-mono text-xs text-cyber-blue border border-dashed border-[#1E293B] rounded-xl bg-[#0B1120]/40">
           <div className="w-8 h-8 rounded-full border-2 border-cyber-blue border-t-transparent animate-spin" />
-          <p className="text-xs tracking-wider text-cyber-blue font-bold uppercase animate-pulse">
-            {"// SYNCHRONIZING SECURE EVENT DIRECTIVES..."}
-          </p>
+          <span className="tracking-widest uppercase">SYNCHRONIZING OPERATIONS LOGS...</span>
         </div>
       ) : events.length === 0 ? (
-        <div className="py-16 flex flex-col items-center justify-center text-center font-mono text-slate-500 gap-2 border border-dashed border-[#1E293B] rounded-xl">
-          <Calendar className="w-8 h-8 opacity-40 text-cyber-blue" />
-          <p className="text-sm">No scheduled events in database.</p>
+        <div className="w-full py-16 text-center border border-dashed border-[#1E293B] rounded-xl bg-[#0B1120]/30 font-mono text-xs text-slate-500">
+          NO OPERATIONS LOGGED IN DATABASE
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {events.map((event) => (
-            <CyberCardBorder key={event.id} contentClassName="p-5 flex flex-col justify-between gap-4">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 font-mono text-[10px]">
-                    <span className="px-2 py-0.5 rounded bg-cyber-blue/10 text-cyber-blue border border-cyber-blue/30 font-bold uppercase">
+            <CyberCardBorder
+              key={event.id}
+              contentClassName="p-5 flex flex-col justify-between gap-4"
+            >
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-[#030712] border border-[#1E293B] text-cyber-blue">
                       {event.type}
                     </span>
-                    {event.status && (
-                      <span
-                        className={`px-2 py-0.5 rounded text-[9px] font-mono font-bold tracking-wider uppercase border ${
-                          event.status === "ONGOING"
-                            ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/40"
-                            : event.status === "UPCOMING"
-                            ? "bg-cyber-blue/15 text-cyber-blue-light border-cyber-blue/40"
-                            : "bg-[#030712] text-slate-400 border-[#1E293B]"
-                        }`}
-                      >
-                        {event.status}
-                      </span>
-                    )}
-                    {event.imageUrl && (
-                      <span className="px-1.5 py-0.5 rounded bg-[#030712] border border-[#1E293B] text-slate-400 text-[9px] flex items-center gap-1">
-                        <ImageIcon className="w-2.5 h-2.5 text-cyber-blue" />
-                        <span>MEDIA</span>
-                      </span>
-                    )}
-                    {event.registrationUrl && (
-                      <span className="px-1.5 py-0.5 rounded bg-[#030712] border border-[#1E293B] text-slate-400 text-[9px] flex items-center gap-1">
-                        <LinkIcon className="w-2.5 h-2.5 text-cyber-blue" />
-                        <span>REG LINK</span>
+                    {event.mode && (
+                      <span className="px-2 py-0.5 rounded text-[9px] font-mono text-slate-300 bg-[#030712] border border-[#1E293B]">
+                        {event.mode}
                       </span>
                     )}
                   </div>
+                  <span className="text-slate-500 font-mono text-[10px]">
+                    {event.status || "UPCOMING"}
+                  </span>
+                </div>
 
-                  <h3 className="font-mono font-bold text-white text-lg mt-2">
+                <div>
+                  <h3 className="font-mono font-bold text-white text-base truncate">
                     {event.title}
                   </h3>
-
-                  <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-slate-400 mt-2">
-                    <div className="flex items-center gap-1 text-slate-300">
-                      <Calendar className="w-3.5 h-3.5 text-cyber-blue" />
-                      <span>{formatEventDisplayDate(event.date)}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5 text-cyber-blue" />
-                      <span>{event.time}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <MapPin className="w-3.5 h-3.5 text-cyber-blue" />
-                      <span>{event.location}</span>
-                    </div>
-                  </div>
-
-                  <p className="text-xs font-mono text-slate-400 mt-2.5 line-clamp-2">
+                  <p className="text-xs font-sans text-slate-400 line-clamp-2 mt-1">
                     {event.description}
                   </p>
+                </div>
 
-                  <div className="flex flex-wrap gap-1.5 mt-3">
-                    {event.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="px-2 py-0.5 rounded bg-[#030712] border border-[#1E293B] font-mono text-[10px] text-slate-300"
-                      >
-                        #{tag}
-                      </span>
-                    ))}
+                <div className="grid grid-cols-2 gap-2 text-xs font-mono text-slate-400 pt-2 border-t border-card-border/60">
+                  <div className="flex items-center gap-1.5 truncate">
+                    <Calendar className="w-3.5 h-3.5 text-cyber-blue shrink-0" />
+                    <span className="truncate">{formatEventDisplayDate(event.date)}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 truncate">
+                    <Clock className="w-3.5 h-3.5 text-cyber-blue shrink-0" />
+                    <span className="truncate">{event.time}</span>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1 shrink-0">
+                {event.highlights && event.highlights.length > 0 && (
+                  <div className="text-[10px] font-mono text-slate-400 bg-[#030712] p-2 rounded border border-[#1E293B]">
+                    <span className="text-cyber-blue font-bold block mb-1">
+                      {event.highlights.length} KEY HIGHLIGHTS / TRACKS
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between pt-3 border-t border-card-border/60 text-xs font-mono text-slate-400">
+                <span className="truncate max-w-[160px] text-[10px]">
+                  {event.imageUrl || "No Image Asset"}
+                </span>
+
+                <div className="flex items-center gap-1.5">
                   <button
                     onClick={() => handleOpenEdit(event)}
                     className="p-1.5 rounded-md border border-[#1E293B] hover:border-cyber-blue/60 bg-[#0B1120] text-slate-300 hover:text-white transition-colors cursor-pointer"
@@ -266,13 +306,18 @@ export default function AdminEventsPage() {
 
       {/* Edit / Add Modal */}
       {editingEvent && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setEditingEvent(null);
+          }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+        >
           <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <CyberCardBorder contentClassName="p-6 sm:p-7 flex flex-col gap-5">
               <div className="flex items-center justify-between border-b border-[#1E293B] pb-3.5">
                 <div className="flex items-center gap-2.5 font-mono text-sm font-bold text-white">
                   <Calendar className="w-4 h-4 text-cyber-blue" />
-                  <span>{isNew ? "SCHEDULE NEW EVENT" : `EDIT: ${editingEvent.title}`}</span>
+                  <span>{isNew ? "SCHEDULE NEW OPERATION" : `EDIT: ${editingEvent.title}`}</span>
                 </div>
                 <button
                   onClick={() => setEditingEvent(null)}
@@ -299,6 +344,7 @@ export default function AdminEventsPage() {
                       }
                       className="w-full rounded-md bg-[#030712] border border-[#1E293B] px-3 py-2 text-xs font-mono text-white outline-none focus:border-cyber-blue transition-colors"
                     >
+                      <option value="Hackathon">Hackathon</option>
                       <option value="Workshop">Workshop</option>
                       <option value="CTF">CTF</option>
                       <option value="Seminar">Seminar</option>
@@ -323,11 +369,11 @@ export default function AdminEventsPage() {
                   </div>
                 </div>
 
-                {/* 2. Date, Time, Location Row */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {/* 2. Date, Time, Venue & Mode */}
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
                   <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-mono font-medium text-slate-300">
-                      DATE
+                      DATE (YYYY-MM-DD)
                     </label>
                     <input
                       type="date"
@@ -357,7 +403,7 @@ export default function AdminEventsPage() {
 
                   <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-mono font-medium text-slate-300">
-                      LOCATION / VENUE
+                      VENUE / LOCATION
                     </label>
                     <input
                       type="text"
@@ -369,57 +415,54 @@ export default function AdminEventsPage() {
                       className="w-full rounded-md bg-[#030712] border border-[#1E293B] px-3 py-2 text-xs font-mono text-white outline-none focus:border-cyber-blue transition-colors"
                     />
                   </div>
-                </div>
-
-                {/* 3. Cover Image and Registration URL Row */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-mono font-medium text-slate-300">
-                      COVER IMAGE <span className="text-slate-500 font-normal">(OPTIONAL)</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={editingEvent.imageUrl || ""}
-                      onChange={(e) =>
-                        setEditingEvent({ ...editingEvent, imageUrl: e.target.value })
-                      }
-                      placeholder="Cloudinary ID (e.g. ctf) or Image URL"
-                      className="w-full rounded-md bg-[#030712] border border-[#1E293B] px-3 py-2 text-xs font-mono text-white outline-none focus:border-cyber-blue transition-colors"
-                    />
-                  </div>
 
                   <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-mono font-medium text-slate-300">
-                      REGISTRATION URL <span className="text-slate-500 font-normal">(OPTIONAL)</span>
+                      EVENT MODE
                     </label>
-                    <input
-                      type="url"
-                      value={editingEvent.registrationUrl || ""}
+                    <select
+                      value={editingEvent.mode || "In-Person"}
                       onChange={(e) =>
-                        setEditingEvent({ ...editingEvent, registrationUrl: e.target.value })
+                        setEditingEvent({
+                          ...editingEvent,
+                          mode: e.target.value as ClubEvent["mode"],
+                        })
                       }
-                      placeholder="https://forms.gle/... or link"
                       className="w-full rounded-md bg-[#030712] border border-[#1E293B] px-3 py-2 text-xs font-mono text-white outline-none focus:border-cyber-blue transition-colors"
-                    />
+                    >
+                      <option value="In-Person">In-Person</option>
+                      <option value="Online">Online</option>
+                      <option value="Hybrid">Hybrid</option>
+                    </select>
                   </div>
                 </div>
 
-                {editingEvent.imageUrl && editingEvent.imageUrl.trim().length > 0 && (
-                  <div className="p-2.5 rounded bg-[#030712] border border-[#1E293B] flex items-center gap-3 overflow-hidden">
-                    <div className="relative w-16 h-12 rounded overflow-hidden bg-[#070D1D] shrink-0 border border-[#1E293B]">
-                      <CloudinaryImage
-                        src={editingEvent.imageUrl}
-                        alt="Preview"
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <div className="font-mono text-xs text-slate-400 min-w-0 flex-1 overflow-hidden">
-                      <span className="text-cyber-blue text-[10px] block font-bold tracking-wider uppercase">PREVIEW</span>
-                      <p className="truncate text-white text-xs block max-w-full font-mono">{editingEvent.imageUrl}</p>
-                    </div>
-                  </div>
-                )}
+                {/* Direct Image Upload / Manual Input Component */}
+                <ImageUploadPicker
+                  label="EVENT COVER IMAGE"
+                  folderHint="whitehats/events"
+                  value={editingEvent.imageUrl}
+                  onChangeValue={(val) =>
+                    setEditingEvent({ ...editingEvent, imageUrl: val })
+                  }
+                  selectedFile={selectedFile}
+                  onSelectFile={setSelectedFile}
+                />
+
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-mono font-medium text-slate-300">
+                    REGISTRATION URL <span className="text-slate-500 font-normal">(OPTIONAL)</span>
+                  </label>
+                  <input
+                    type="url"
+                    value={editingEvent.registrationUrl || ""}
+                    onChange={(e) =>
+                      setEditingEvent({ ...editingEvent, registrationUrl: e.target.value })
+                    }
+                    placeholder="https://forms.gle/... or registration link"
+                    className="w-full rounded-md bg-[#030712] border border-[#1E293B] px-3 py-2 text-xs font-mono text-white outline-none focus:border-cyber-blue transition-colors"
+                  />
+                </div>
 
                 <div className="flex flex-col gap-1">
                   <label className="text-xs font-mono text-slate-300">DESCRIPTION</label>
@@ -434,16 +477,22 @@ export default function AdminEventsPage() {
                 </div>
 
                 <div className="flex flex-col gap-1">
+                  <label className="text-xs font-mono text-slate-300">KEY HIGHLIGHTS & TRACKS (ONE PER LINE)</label>
+                  <textarea
+                    rows={3}
+                    value={highlightsInput}
+                    onChange={(e) => setHighlightsInput(e.target.value)}
+                    placeholder="Multi-track cyber challenges&#10;Hands-on labs&#10;Live exploit mitigation"
+                    className="w-full rounded-md bg-[#030712] border border-[#1E293B] px-3 py-2 text-xs font-mono text-white outline-none focus:border-cyber-blue"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1">
                   <label className="text-xs font-mono text-slate-300">TAGS (COMMA SEPARATED)</label>
                   <input
                     type="text"
-                    value={editingEvent.tags.join(", ")}
-                    onChange={(e) =>
-                      setEditingEvent({
-                        ...editingEvent,
-                        tags: e.target.value.split(",").map((s) => s.trim()).filter(Boolean),
-                      })
-                    }
+                    value={tagsInput}
+                    onChange={(e) => setTagsInput(e.target.value)}
                     placeholder="Web, Crypto, Pwn"
                     className="w-full rounded-md bg-[#030712] border border-[#1E293B] px-3 py-2 text-xs font-mono text-white outline-none focus:border-cyber-blue"
                   />
@@ -462,8 +511,14 @@ export default function AdminEventsPage() {
                     disabled={loading}
                     className="px-4 py-2 rounded-md bg-cyber-blue text-black font-mono text-xs font-bold hover:bg-cyber-blue-light flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                   >
-                    <Save className="w-3.5 h-3.5" />
-                    <span>{loading ? "SAVING..." : "COMMIT EVENT"}</span>
+                    {loading ? (
+                      <span className="animate-pulse">SAVING & UPLOADING...</span>
+                    ) : (
+                      <>
+                        <Save className="w-3.5 h-3.5" />
+                        <span>SAVE OPERATION</span>
+                      </>
+                    )}
                   </button>
                 </div>
               </form>
