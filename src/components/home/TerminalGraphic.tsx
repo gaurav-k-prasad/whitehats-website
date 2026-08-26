@@ -13,7 +13,12 @@ interface HistoryItem {
 
 export default function TerminalGraphic() {
   const [history, setHistory] = useState<HistoryItem[]>([]);
-  const [bootLines, setBootLines] = useState<React.ReactNode[]>([]);
+  const [bootLines, setBootLines] = useState<React.ReactNode[]>([
+    <div key="boot-1" className="text-slate-400 font-mono text-[11px] flex items-center gap-1.5 leading-tight">
+      <span className="text-cyber-blue">[+]</span>
+      <span>Initializing secure WhiteHats terminal...</span>
+    </div>,
+  ]);
   const [inputVal, setInputVal] = useState("");
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState<number>(-1);
@@ -25,16 +30,7 @@ export default function TerminalGraphic() {
   // Boot sequence:
   // Render the initial banner with the 3 boot lines progressively added to its right side.
   useEffect(() => {
-    // 1. Initial 1st boot line (at start)
-    const line1 = (
-      <div key="boot-1" className="text-slate-400 font-mono text-[11px] flex items-center gap-1.5 leading-tight">
-        <span className="text-cyber-blue">[+]</span>
-        <span>Initializing secure WhiteHats terminal...</span>
-      </div>
-    );
-    setBootLines([line1]);
-
-    // 2. Add 2nd boot line at 1000ms
+    // 1. Add 2nd boot line at 1000ms
     const t1 = setTimeout(() => {
       const line2 = (
         <div key="boot-2" className="text-slate-400 font-mono text-[11px] flex items-center gap-1.5 leading-tight">

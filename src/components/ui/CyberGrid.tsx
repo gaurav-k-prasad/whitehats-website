@@ -48,7 +48,7 @@ export default function CyberGrid() {
         <div className="absolute top-[18%] left-[8%] flex items-center gap-2">
           <div className="w-1.5 h-1.5 rounded-full bg-cyber-blue shadow-[0_0_10px_#0088FF] animate-pulse" />
           <span className="font-mono text-[9px] text-cyber-blue/30 tracking-widest uppercase">
-            // NODE_ALPHA_01
+            {"// NODE_ALPHA_01"}
           </span>
         </div>
 
@@ -56,7 +56,7 @@ export default function CyberGrid() {
         <div className="absolute top-[45%] right-[10%] flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-cyber-blue/80 shadow-[0_0_12px_#0088FF]" />
           <span className="font-mono text-[9px] text-cyber-blue/30 tracking-widest uppercase">
-            // SEC_GRID_44
+            {"// SEC_GRID_44"}
           </span>
         </div>
 
@@ -64,7 +64,7 @@ export default function CyberGrid() {
         <div className="absolute top-[75%] left-[12%] flex items-center gap-2">
           <div className="w-1.5 h-1.5 rounded-full bg-emerald-400/80 shadow-[0_0_10px_#34D399]" />
           <span className="font-mono text-[9px] text-emerald-400/30 tracking-widest uppercase">
-            // TELEMETRY_SYNC
+            {"// TELEMETRY_SYNC"}
           </span>
         </div>
       </motion.div>

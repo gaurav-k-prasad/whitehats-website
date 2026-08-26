@@ -39,7 +39,7 @@ export default function Loading() {
           </div>
 
           <div className="font-mono text-[11px] text-slate-500 tracking-wider">
-            // DECRYPTING_ASSETS &bull; ESTABLISHING_SOCKET
+            {"// DECRYPTING_ASSETS • ESTABLISHING_SOCKET"}
           </div>
         </div>
 

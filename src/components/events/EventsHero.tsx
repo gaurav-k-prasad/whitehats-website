@@ -147,7 +147,7 @@ export default function EventsHero() {
         <div className="rounded-xl border border-card-border bg-[#0B1120]/90 p-4 sm:p-5 flex flex-col gap-3 shadow-xl">
           <div className="flex items-center justify-between border-b border-card-border pb-2">
             <span className="font-mono text-[11px] font-bold text-cyber-blue-light tracking-widest uppercase">
-              // COMMUNITY IMPACT
+              {"// COMMUNITY IMPACT"}
             </span>
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
           </div>

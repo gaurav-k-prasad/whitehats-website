@@ -10,9 +10,10 @@ import ScanlineOverlay from "@/components/ui/ScanlineOverlay";
 interface BoardCardProps {
   member: BoardMember;
   isLarge?: boolean;
+  isCenter?: boolean;
 }
 
-export default function BoardCard({ member, isLarge = false }: BoardCardProps) {
+export default function BoardCard({ member, isLarge = false, isCenter = false }: BoardCardProps) {
   const [imageError, setImageError] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
@@ -24,7 +25,7 @@ export default function BoardCard({ member, isLarge = false }: BoardCardProps) {
       onMouseLeave={() => setIsHovered(false)}
       className="h-full select-none"
     >
-      <CyberCardBorder isHovered={isHovered} className="h-full group shadow-xl" contentClassName="p-4 sm:p-5 flex flex-col justify-between h-full">
+      <CyberCardBorder isHovered={isHovered || isCenter} className="h-full group shadow-xl" contentClassName="p-4 sm:p-5 flex flex-col justify-between h-full">
         <ScanlineOverlay opacity="opacity-[0.03]" />
 
         {/* Top Image Section with strict portrait aspect ratio */}
@@ -67,7 +68,7 @@ export default function BoardCard({ member, isLarge = false }: BoardCardProps) {
                 </svg>
               </div>
               <span className="font-mono text-[10px] text-slate-400 tracking-widest uppercase">
-                // OPERATOR ID
+                {"// OPERATOR ID"}
               </span>
             </div>
           )}

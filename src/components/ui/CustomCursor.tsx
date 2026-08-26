@@ -1,10 +1,22 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useSyncExternalStore } from "react";
 import { motion, useMotionValue, useSpring } from "framer-motion";
 
+function subscribePointer(callback: () => void) {
+  if (typeof window === "undefined") return () => {};
+  const media = window.matchMedia("(hover: hover) and (pointer: fine)");
+  media.addEventListener("change", callback);
+  return () => media.removeEventListener("change", callback);
+}
+
+function getPointerSnapshot() {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+}
+
 export default function CustomCursor() {
-  const [isEnabled, setIsEnabled] = useState(false);
+  const isEnabled = useSyncExternalStore(subscribePointer, getPointerSnapshot, () => false);
   const [isHovered, setIsHovered] = useState(false);
   const [isClicking, setIsClicking] = useState(false);
 
@@ -16,12 +28,7 @@ export default function CustomCursor() {
   const ringY = useSpring(mouseY, { stiffness: 320, damping: 24, mass: 0.4 });
 
   useEffect(() => {
-    // Only enable on fine pointer / desktop hover-capable devices
-    if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
-      setIsEnabled(true);
-    } else {
-      return;
-    }
+    if (!isEnabled) return;
 
     const handleMouseMove = (e: MouseEvent) => {
       mouseX.set(e.clientX);
@@ -63,7 +70,7 @@ export default function CustomCursor() {
       document.removeEventListener("mouseover", handleMouseOver);
       document.removeEventListener("mouseout", handleMouseOut);
     };
-  }, [mouseX, mouseY]);
+  }, [isEnabled, mouseX, mouseY]);
 
   if (!isEnabled) return null;
 

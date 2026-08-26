@@ -38,6 +38,6 @@ export const GALLERY_ITEMS: GalleryItem[] = [
   { id: "11", title: "Behind the Scenes #1", quote: "", date: "", year: "2026", category: "BEHIND THE SCENES", tags: ["Team Culture"], imageUrl: "bts1", width: 580, height: 440, aspectClass: "aspect-[14/10]" },
   { id: "12", title: "Behind the Scenes #2", quote: "", date: "", year: "2026", category: "BEHIND THE SCENES", tags: ["Lab Nights"], imageUrl: "bts2", width: 420, height: 600, aspectClass: "aspect-[7/10]" },
   { id: "13", title: "Behind the Scenes #3", quote: "", date: "", year: "2026", category: "BEHIND THE SCENES", tags: ["War Room"], imageUrl: "bts3", width: 680, height: 380, aspectClass: "aspect-[16/9]" },
-  { id: "14", title: "Behind the Scenes #4", quote: "", date: "", year: "2026", category: "BEHIND THE SCENES", tags: ["Hardware Bench"], imageUrl: "bts4", width: 360, height: 580, aspectClass: "aspect-[9/15]" },
+  { id: "14", title: "Behind the Scenes #4", quote: "", date: "", year: "2026", category: "BEHIND THE SCENES", tags: ["Hardware Bench"], imageUrl: "bts4", width: 500, height: 580, aspectClass: "aspect-[1/1]" },
   { id: "15", title: "Behind the Scenes #5", quote: "", date: "", year: "2026", category: "BEHIND THE SCENES", tags: ["Hackathon Setup"], imageUrl: "bts5", width: 500, height: 500, aspectClass: "aspect-square" },
 ];

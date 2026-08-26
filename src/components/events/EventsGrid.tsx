@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { EVENTS_DATA } from "@/data/eventsData";
+import { ClubEvent, sortEventsDescending } from "@/data/eventsData";
 import EventCard from "./EventCard";
 import CipherReveal from "@/components/ui/CipherReveal";
 
@@ -16,30 +16,50 @@ const FILTER_OPTIONS: { label: string; value: EventFilterType }[] = [
   { label: "Bootcamp", value: "Bootcamp" },
 ];
 
-export default function EventsGrid() {
+interface EventsGridProps {
+  events?: ClubEvent[];
+}
+
+export default function EventsGrid({ events: initialEvents }: EventsGridProps) {
+  const [eventsList, setEventsList] = useState<ClubEvent[]>(initialEvents || []);
+  const [isLoading, setIsLoading] = useState(!initialEvents);
   const [activeFilter, setActiveFilter] = useState<EventFilterType>("All");
 
+  useEffect(() => {
+    if (!initialEvents) {
+      fetch("/api/events")
+        .then((res) => res.json())
+        .then((data) => {
+          setEventsList(data.events || []);
+        })
+        .catch(() => {
+          setEventsList([]);
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    }
+  }, [initialEvents]);
+
   const filteredEvents = useMemo(() => {
-    if (activeFilter === "All") return EVENTS_DATA;
-    return EVENTS_DATA.filter((event) => event.type === activeFilter);
-  }, [activeFilter]);
+    const list = activeFilter === "All" ? eventsList : eventsList.filter((event) => event.type === activeFilter);
+    return sortEventsDescending(list);
+  }, [activeFilter, eventsList]);
 
   return (
     <section id="past-events" className="w-full flex flex-col gap-6 pt-4">
       {/* Header Bar: Title & Tactical Filter Pills */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-card-border pb-4">
-        {/* Left: Title & Count with CipherReveal */}
         <div className="flex items-center gap-3">
           <div className="w-2.5 h-2.5 rounded-full bg-cyber-blue shadow-neon-blue animate-pulse" />
           <h2 className="text-xl sm:text-2xl font-black font-mono tracking-wider uppercase text-white">
             <CipherReveal text="// PAST EVENTS" duration={400} />
           </h2>
           <span className="font-mono text-xs text-slate-500 px-2 py-0.5 rounded bg-[#0B1120] border border-[#1E293B]">
-            {filteredEvents.length} RECORDS
+            {isLoading ? "SYNCING..." : `${filteredEvents.length} RECORDS`}
           </span>
         </div>
 
-        {/* Right: Filter Pills */}
         <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-[#0B1120] border border-[#1E293B]">
           {FILTER_OPTIONS.map((option) => {
             const isActive = activeFilter === option.value;
@@ -60,24 +80,34 @@ export default function EventsGrid() {
         </div>
       </div>
 
-      {/* 3-Column Responsive Grid with Smooth Stagger / Reshuffle Animations */}
-      <motion.div
-        layout
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-      >
-        <AnimatePresence mode="popLayout">
-          {filteredEvents.map((event) => (
-            <EventCard key={event.id} event={event} />
-          ))}
-        </AnimatePresence>
-      </motion.div>
-
-      {filteredEvents.length === 0 && (
-        <div className="w-full py-20 flex flex-col items-center justify-center text-center gap-2 border border-dashed border-[#1E293B] rounded-xl bg-[#0B1120]/40">
-          <p className="font-mono text-sm text-slate-400">
-            // NO ARCHIVED EVENTS FOUND UNDER THIS CATEGORY
+      {isLoading ? (
+        <div className="w-full py-24 flex flex-col items-center justify-center text-center gap-3 border border-dashed border-[#1E293B] rounded-xl bg-[#0B1120]/40">
+          <div className="w-8 h-8 rounded-full border-2 border-cyber-blue border-t-transparent animate-spin" />
+          <p className="font-mono text-xs text-cyber-blue font-bold tracking-widest uppercase animate-pulse">
+            {"// SYNCHRONIZING EVENT ARCHIVES..."}
           </p>
         </div>
+      ) : (
+        <>
+          <motion.div
+            layout
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            <AnimatePresence mode="popLayout">
+              {filteredEvents.map((event) => (
+                <EventCard key={event.id} event={event} />
+              ))}
+            </AnimatePresence>
+          </motion.div>
+
+          {filteredEvents.length === 0 && (
+            <div className="w-full py-20 flex flex-col items-center justify-center text-center gap-2 border border-dashed border-[#1E293B] rounded-xl bg-[#0B1120]/40">
+              <p className="font-mono text-sm text-slate-400">
+                {"// NO ARCHIVED EVENTS FOUND UNDER THIS CATEGORY"}
+              </p>
+            </div>
+          )}
+        </>
       )}
     </section>
   );

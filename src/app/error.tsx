@@ -56,7 +56,7 @@ export default function Error({ error, reset }: ErrorProps) {
           {/* Error Diagnostics Terminal */}
           <div className="w-full max-w-md bg-[#030712] border border-card-border rounded-lg p-4 font-mono text-xs text-left mb-8 space-y-1.5 shadow-inner">
             <div className="flex items-center justify-between text-slate-500 pb-2 border-b border-card-border/50">
-              <span>// EXCEPTION TRACE</span>
+              <span>{"// EXCEPTION TRACE"}</span>
               <span className="text-amber-400 font-semibold">SIGSEGV / INTERRUPT</span>
             </div>
             <div className="text-slate-400 truncate">

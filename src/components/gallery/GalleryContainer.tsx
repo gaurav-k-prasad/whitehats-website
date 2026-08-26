@@ -1,12 +1,14 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
-import { GALLERY_ITEMS, GalleryFilterState, GalleryItem } from "@/data/galleryData";
+import React, { useState, useEffect, useMemo } from "react";
+import { GalleryFilterState, GalleryItem } from "@/data/galleryData";
 import GalleryFilters from "./GalleryFilters";
 import HorizontalMasonry from "./HorizontalMasonry";
 import LightboxModal from "./LightboxModal";
 
 export default function GalleryContainer() {
+  const [items, setItems] = useState<GalleryItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [filterState, setFilterState] = useState<GalleryFilterState>({
     category: "ALL",
     searchQuery: "",
@@ -14,9 +16,23 @@ export default function GalleryContainer() {
 
   const [selectedItem, setSelectedItem] = useState<GalleryItem | null>(null);
 
+  useEffect(() => {
+    fetch("/api/gallery")
+      .then((res) => res.json())
+      .then((data) => {
+        setItems(data.items || []);
+      })
+      .catch(() => {
+        setItems([]);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, []);
+
   // Filter items based on active category and search query
   const filteredItems = useMemo(() => {
-    return GALLERY_ITEMS.filter((item) => {
+    return items.filter((item) => {
       // Category match
       if (
         filterState.category !== "ALL" &&
@@ -38,7 +54,7 @@ export default function GalleryContainer() {
 
       return true;
     });
-  }, [filterState]);
+  }, [filterState, items]);
 
   return (
     <div className="w-full flex flex-col">
@@ -47,13 +63,14 @@ export default function GalleryContainer() {
         filterState={filterState}
         onFilterChange={setFilterState}
         filteredCount={filteredItems.length}
-        totalCount={GALLERY_ITEMS.length}
+        totalCount={items.length}
       />
 
       {/* Main Horizontal Multi-Row Masonry Grid */}
       <div className="w-full py-2">
         <HorizontalMasonry
           items={filteredItems}
+          isLoading={isLoading}
           onSelect={setSelectedItem}
         />
       </div>

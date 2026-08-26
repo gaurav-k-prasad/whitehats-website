@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, CheckCircle2 } from "lucide-react";
+import { Send, CheckCircle2, AlertTriangle, Loader2 } from "lucide-react";
 import CyberCardBorder from "@/components/ui/CyberCardBorder";
 import ScanlineOverlay from "@/components/ui/ScanlineOverlay";
 import MagneticButton from "@/components/ui/MagneticButton";
@@ -28,7 +28,9 @@ const FIELD_CLASSES =
 
 export default function ContactForm() {
   const [form, setForm] = useState<FormState>(INITIAL_STATE);
+  const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [isHovered, setIsHovered] = useState(false);
 
   const emailChannel = CONTACT_CHANNELS.find((c) => c.id === "email");
@@ -38,23 +40,50 @@ export default function ContactForm() {
   ) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
+    if (error) setError(null);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name || !form.email || !form.message) return;
+    if (!form.name.trim() || !form.email.trim() || !form.message.trim()) {
+      setError("Please complete all required fields.");
+      setSubmitted(false);
+      return;
+    }
 
-    // No backend wired up yet — hands off to the user's mail client.
-    // Swap this for a real API route / form handler once one exists.
-    const subjectLabel =
-      CONTACT_SUBJECTS.find((s) => s.value === form.subject)?.label ?? "General Inquiry";
-    const mailBody = `Name: ${form.name}\nEmail: ${form.email}\n\n${form.message}`;
-    const mailto = `mailto:${emailChannel?.value ?? "contact@whitehats.club"}?subject=${encodeURIComponent(
-      `[WhiteHats Site] ${subjectLabel}`
-    )}&body=${encodeURIComponent(mailBody)}`;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(form.email.trim())) {
+      setError("Valid email address is required");
+      setSubmitted(false);
+      return;
+    }
 
-    window.location.href = mailto;
-    setSubmitted(true);
+    setLoading(true);
+    setError(null);
+
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "Failed to transmit message.");
+        setSubmitted(false);
+        return;
+      }
+
+      setError(null);
+      setSubmitted(true);
+    } catch {
+      setError("Network or server connection failed. Please try again.");
+      setSubmitted(false);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -72,6 +101,13 @@ export default function ContactForm() {
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
         </div>
 
+        {error && !submitted && (
+          <div className="mb-4 p-3 rounded-lg border border-red-500/40 bg-red-500/10 text-red-400 font-mono text-xs flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
+
         <AnimatePresence mode="wait">
           {submitted ? (
             <motion.div
@@ -83,10 +119,10 @@ export default function ContactForm() {
             >
               <CheckCircle2 className="w-10 h-10 text-emerald-400" strokeWidth={1.5} />
               <p className="font-mono text-sm text-slate-200 font-bold">
-                MESSAGE HANDED OFF TO YOUR MAIL CLIENT
+                TRANSMISSION LOGGED TO COMMAND VAULT
               </p>
               <p className="text-text-muted text-xs max-w-xs">
-                Finish sending it from there. Didn&apos;t open? Email us directly at{" "}
+                Our operations team will review your message shortly. Alternatively, you can reach us directly at{" "}
                 <a href={emailChannel?.href} className="text-cyber-blue hover:underline">
                   {emailChannel?.value}
                 </a>
@@ -96,8 +132,9 @@ export default function ContactForm() {
                 onClick={() => {
                   setForm(INITIAL_STATE);
                   setSubmitted(false);
+                  setError(null);
                 }}
-                className="mt-2 text-xs font-mono text-cyber-blue hover:text-cyber-blue-light underline underline-offset-4"
+                className="mt-2 text-xs font-mono text-cyber-blue hover:text-cyber-blue-light underline underline-offset-4 cursor-pointer"
               >
                 Send another message
               </button>
@@ -182,10 +219,20 @@ export default function ContactForm() {
                 <MagneticButton strength={14}>
                   <button
                     type="submit"
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded bg-cyber-blue hover:bg-cyber-blue-light text-black font-mono font-bold text-xs tracking-wider uppercase transition-all shadow-neon-blue hover:shadow-[0_0_25px_rgba(0,136,255,0.6)] cursor-pointer"
+                    disabled={loading}
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded bg-cyber-blue hover:bg-cyber-blue-light text-black font-mono font-bold text-xs tracking-wider uppercase transition-all shadow-neon-blue hover:shadow-[0_0_25px_rgba(0,136,255,0.6)] cursor-pointer disabled:opacity-50"
                   >
-                    <span>Send Transmission</span>
-                    <Send className="w-3.5 h-3.5" strokeWidth={2.5} />
+                    {loading ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>TRANSMITTING...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Send Transmission</span>
+                        <Send className="w-3.5 h-3.5" strokeWidth={2.5} />
+                      </>
+                    )}
                   </button>
                 </MagneticButton>
               </div>

@@ -63,6 +63,17 @@ body {
   scrollbar-color: #1E293B #030712;
 }
 
+/* Remove default browser spinner controls on number inputs */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
 /* Cyber Glitch Reveal Keyframes */
 @keyframes cyberGlitchIn {
   0% {

@@ -8,11 +8,13 @@ import MagneticButton from "@/components/ui/MagneticButton";
 
 interface HorizontalMasonryProps {
   items: GalleryItem[];
+  isLoading?: boolean;
   onSelect: (item: GalleryItem) => void;
 }
 
 export default function HorizontalMasonry({
   items,
+  isLoading = false,
   onSelect,
 }: HorizontalMasonryProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -134,21 +136,32 @@ const numRows = Math.max(1, Math.min(baseRows, Math.ceil(items.length / 3)));
     });
   };
 
-  if (items.length === 0) {
-    return (
-      <div className="w-full py-28 flex flex-col items-center justify-center text-center gap-3 border border-dashed border-[#1E293B] rounded-2xl bg-[#0B1120]/40">
-        <div className="w-12 h-12 rounded-full border border-cyber-blue/40 flex items-center justify-center text-cyber-blue font-mono text-lg animate-pulse">
-          //
+    if (isLoading) {
+      return (
+        <div className="w-full py-28 flex flex-col items-center justify-center text-center gap-3 border border-dashed border-[#1E293B] rounded-2xl bg-[#0B1120]/40">
+          <div className="w-10 h-10 rounded-full border-2 border-cyber-blue border-t-transparent animate-spin" />
+          <p className="font-mono text-xs text-cyber-blue font-bold tracking-widest uppercase animate-pulse">
+            {"// SYNCHRONIZING ARCHIVAL MEDIA STREAM..."}
+          </p>
         </div>
-        <p className="font-mono text-sm text-slate-300 font-bold tracking-wider uppercase">
-          // NO ARCHIVE RECORDS MATCHING ACTIVE FILTER
-        </p>
-        <span className="font-mono text-xs text-slate-500">
-          Try resetting category filters or adjusting search queries.
-        </span>
-      </div>
-    );
-  }
+      );
+    }
+
+    if (items.length === 0) {
+      return (
+        <div className="w-full py-28 flex flex-col items-center justify-center text-center gap-3 border border-dashed border-[#1E293B] rounded-2xl bg-[#0B1120]/40">
+          <div className="w-12 h-12 rounded-full border border-cyber-blue/40 flex items-center justify-center text-cyber-blue font-mono text-lg animate-pulse">
+            {"//"}
+          </div>
+          <p className="font-mono text-sm text-slate-300 font-bold tracking-wider uppercase">
+            {"// NO ARCHIVE RECORDS MATCHING ACTIVE FILTER"}
+          </p>
+          <span className="font-mono text-xs text-slate-500">
+            Try resetting category filters or adjusting search queries.
+          </span>
+        </div>
+      );
+    }
 
   return (
     <div className="w-full flex flex-col gap-4">

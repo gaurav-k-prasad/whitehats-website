@@ -40,3 +40,11 @@ debug/
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# cloudflare wrangler local state
+.wrangler/
+
+# generated database seed files
+drizzle/seed.sql
+
+

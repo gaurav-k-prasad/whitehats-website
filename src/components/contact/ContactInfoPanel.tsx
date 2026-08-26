@@ -55,7 +55,7 @@ export default function ContactInfoPanel() {
       {/* Socials */}
       <CyberCardBorder className="shadow-lg" contentClassName="p-4 sm:p-5 flex flex-col gap-3">
         <span className="font-mono text-[11px] font-bold text-cyber-blue-light tracking-widest uppercase">
-          // FOLLOW THE OPERATION
+          {"// FOLLOW THE OPERATION"}
         </span>
         <div className="flex items-center gap-2.5">
           {SOCIAL_LINKS.map((social) => (

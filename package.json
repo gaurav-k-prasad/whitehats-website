@@ -6,12 +6,18 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate:local": "wrangler d1 migrations apply whitehats_prod_db --local",
+    "db:migrate:prod": "wrangler d1 migrations apply whitehats_prod_db --remote",
+    "db:seed:local": "node --loader ts-node/esm scripts/seed-local.ts"
   },
   "dependencies": {
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
+    "drizzle-orm": "^0.45.2",
     "framer-motion": "^13.1.1",
+    "jose": "^6.2.10",
     "lucide-react": "^1.33.0",
     "next": "16.3.1",
     "next-cloudinary": "^6.18.8",
@@ -20,13 +26,19 @@
     "tailwind-merge": "^3.6.0"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260826.1",
     "@tailwindcss/postcss": "^4",
+    "@types/better-sqlite3": "^9.6.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "better-sqlite3": "^13.0.3",
+    "drizzle-kit": "^0.31.10",
     "eslint": "^9",
     "eslint-config-next": "16.3.1",
+    "eslint-plugin-unused-imports": "^4.4.1",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wrangler": "^4.126.0"
   }
 }

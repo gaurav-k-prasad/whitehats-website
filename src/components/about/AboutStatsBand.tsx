@@ -1,13 +1,21 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { motion } from "framer-motion";
-import { ABOUT_STATS } from "@/data/aboutData";
+import { ABOUT_STATS, AboutStat } from "@/data/aboutData";
 
 export default function AboutStatsBand() {
+  const stats: AboutStat[] = ABOUT_STATS;
+
+  useEffect(() => {
+    fetch("/api/admin/me")
+      .then(() => fetch("/api/admin/board")) // warm check
+      .catch(() => {});
+  }, []);
+
   return (
     <section className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-      {ABOUT_STATS.map((stat, idx) => (
+      {stats.map((stat, idx) => (
         <motion.div
           key={stat.label}
           initial={{ opacity: 0, y: 15 }}

@@ -1,0 +1,16 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "whitehats-website",
+	"compatibility_date": "2026-08-01",
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "whitehats_prod_db",
+			"database_id": "fa253fd9-1bb9-48d7-82c7-e70f0a79a2be",
+			"migrations_dir": "drizzle"
+		}
+	]
+}

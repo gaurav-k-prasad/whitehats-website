@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -11,14 +11,11 @@ import MagneticButton from "@/components/ui/MagneticButton";
 import CipherReveal from "@/components/ui/CipherReveal";
 
 export default function NotFound() {
-  const [ipAddress, setIpAddress] = useState("127.0.0.1");
-
-  useEffect(() => {
-    // Generate pseudo random simulated client IP for cyberpunk atmosphere
+  const [ipAddress] = useState(() => {
     const seg1 = Math.floor(Math.random() * 150) + 50;
     const seg2 = Math.floor(Math.random() * 200) + 10;
-    setIpAddress(`192.${seg1}.${seg2}.108`);
-  }, []);
+    return `192.${seg1}.${seg2}.108`;
+  });
 
   return (
     <div className="min-h-screen bg-bg-main text-slate-100 selection:bg-cyber-blue selection:text-black relative overflow-x-hidden font-sans flex flex-col justify-between">
@@ -63,7 +60,7 @@ export default function NotFound() {
           {/* Diagnostic Console Box */}
           <div className="w-full max-w-lg bg-[#030712] border border-card-border rounded-lg p-4 font-mono text-xs text-left mb-8 space-y-1.5 shadow-inner">
             <div className="flex items-center justify-between text-slate-500 pb-2 border-b border-card-border/50">
-              <span>// SYSTEM DIAGNOSTICS</span>
+              <span>{"// SYSTEM DIAGNOSTICS"}</span>
               <span className="text-red-400 font-semibold">STATUS: ANOMALY</span>
             </div>
             <div className="text-slate-400">

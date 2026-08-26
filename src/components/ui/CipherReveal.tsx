@@ -29,7 +29,7 @@ export default function CipherReveal({
     if (!isInView || hasAnimated) return;
 
     const timeout = setTimeout(() => {
-      let startTime = Date.now();
+      const startTime = Date.now();
       const scrambleFrames = duration * 0.4; // 40% full scramble
 
       const interval = setInterval(() => {

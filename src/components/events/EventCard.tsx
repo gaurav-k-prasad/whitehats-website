@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ClubEvent } from "@/data/eventsData";
+import { ClubEvent, formatEventDisplayDate } from "@/data/eventsData";
 import CyberCardBorder from "@/components/ui/CyberCardBorder";
 import ScanlineOverlay from "@/components/ui/ScanlineOverlay";
 
@@ -18,7 +18,6 @@ function useDecryptingText(originalText: string, isTriggered: boolean) {
 
   useEffect(() => {
     if (!isTriggered) {
-      setDisplayText(originalText);
       return;
     }
 
@@ -104,6 +103,32 @@ function renderTypeBadge(type: ClubEvent["type"]) {
   }
 }
 
+function renderStatusBadge(status?: ClubEvent["status"]) {
+  if (!status) return null;
+  switch (status) {
+    case "ONGOING":
+      return (
+        <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold tracking-widest uppercase border border-emerald-500/50 bg-emerald-500/15 text-emerald-300 flex items-center gap-1.5 shadow-[0_0_10px_rgba(52,211,153,0.4)]">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          ONGOING
+        </span>
+      );
+    case "UPCOMING":
+      return (
+        <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold tracking-widest uppercase border border-cyber-blue/50 bg-cyber-blue/15 text-cyber-blue-light flex items-center gap-1.5 shadow-[0_0_10px_rgba(0,136,255,0.3)]">
+          <span className="w-1.5 h-1.5 rounded-full bg-cyber-blue animate-pulse" />
+          UPCOMING
+        </span>
+      );
+    case "PAST":
+      return (
+        <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-semibold tracking-widest uppercase border border-[#1E293B] bg-[#030712]/80 text-slate-400">
+          PAST
+        </span>
+      );
+  }
+}
+
 export default function EventCard({ event }: EventCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const decryptedDescription = useDecryptingText(event.description, isHovered);
@@ -137,15 +162,13 @@ export default function EventCard({ event }: EventCardProps) {
           <div className="relative h-36 w-full bg-gradient-to-br from-[#060D1F] via-[#091326] to-[#0B1120] p-4 flex flex-col justify-between border-b border-[#1E293B] overflow-hidden">
             {/* Subtle Binary Code Matrix Watermark */}
             <div className="absolute inset-0 font-mono text-[9px] text-cyber-blue/[0.07] leading-tight select-none pointer-events-none p-2 break-all overflow-hidden">
-              01000101 01010110 01000101 01001110 01010100 01010011 00100000 01010111 01001000 01001001 01010100 01000101 01001000 01000001 01010100 01010011 00100000 01010011 01000101 01000011 01010101 01010010 01001001 01010100 01011001 00100000 01001111 01010000 01010011
+              01000101 01010110 01000101 01001110 01010010 01010100 00100000 01010111 01001000 01001001 01010100 01000101 01001000 01000001 01010100 01010011 00100000 01010011 01000101 01000011 01010101 01010010 01001001 01010100 01011001 00100000 01001111 01010000 01010011
             </div>
 
-            {/* Top Row: Type Badge & Event ID */}
+            {/* Top Row: Type Badge & Dynamic Status Badge */}
             <div className="relative z-10 flex items-center justify-between">
               {renderTypeBadge(event.type)}
-              <span className="font-mono text-[10px] text-slate-500 font-semibold uppercase tracking-wider">
-                {event.id}
-              </span>
+              {renderStatusBadge(event.status)}
             </div>
 
             {/* Large Stylized Event Title */}
@@ -162,7 +185,7 @@ export default function EventCard({ event }: EventCardProps) {
               <svg className="w-3.5 h-3.5 text-cyber-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
-              <span>{event.date}</span>
+              <span>{formatEventDisplayDate(event.date)}</span>
             </div>
 
             <div className="flex items-center gap-1.5 text-slate-400">
