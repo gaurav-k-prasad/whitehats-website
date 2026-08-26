@@ -47,12 +47,34 @@ useEffect(() => {
 // gets a few cards instead of splitting into mostly-empty rows.
 const numRows = Math.max(1, Math.min(baseRows, Math.ceil(items.length / 3)));
 
-  // Split filtered items into parallel horizontal rows
+  // Greedily distribute items to the row with the shortest cumulative width
+  // (calculated based on each card's aspect ratio and row gaps) so all rows stay balanced!
   const rowSlices = useMemo(() => {
     const rows: GalleryItem[][] = Array.from({ length: numRows }, () => []);
-    items.forEach((item, index) => {
-      rows[index % numRows].push(item);
+    const rowWidths: number[] = new Array(numRows).fill(0);
+
+    items.forEach((item) => {
+      // Find the row currently with the smallest cumulative width
+      let shortestRowIdx = 0;
+      let minWidth = rowWidths[0];
+      for (let r = 1; r < numRows; r++) {
+        if (rowWidths[r] < minWidth) {
+          minWidth = rowWidths[r];
+          shortestRowIdx = r;
+        }
+      }
+
+      // Calculate aspect ratio width (fallback to 4/3 if not available)
+      const aspect =
+        item.width && item.height && item.height > 0
+          ? item.width / item.height
+          : 4 / 3;
+
+      rows[shortestRowIdx].push(item);
+      // Add aspect ratio + small gap weight so shorter cards don't create excess gap accumulation
+      rowWidths[shortestRowIdx] += aspect + 0.08;
     });
+
     return rows;
   }, [items, numRows]);
 
@@ -188,10 +210,11 @@ const numRows = Math.max(1, Math.min(baseRows, Math.ceil(items.length / 3)));
               className="flex flex-row gap-4 sm:gap-6 items-stretch h-[240px] sm:h-[280px] md:h-[310px]"
             >
               <AnimatePresence mode="popLayout">
-                {rowItems.map((item) => (
+                {rowItems.map((item, cardIndex) => (
                   <GalleryCard
                     key={item.id}
                     item={item}
+                    priority={cardIndex < 2}
                     onSelect={handleCardSelect}
                   />
                 ))}

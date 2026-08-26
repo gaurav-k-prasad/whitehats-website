@@ -5,6 +5,7 @@ import GalleryContainer from "@/components/gallery/GalleryContainer";
 import GalleryHeroGraphic from "@/components/gallery/GalleryHeroGraphic";
 import PageHero from "@/components/ui/PageHero";
 import CyberGrid from "@/components/ui/CyberGrid";
+import { fetchAllGalleryItems } from "@/lib/db";
 
 export const metadata = {
   title: "Archival Media | WhiteHats Gallery",
@@ -12,7 +13,9 @@ export const metadata = {
     "Explore WhiteHats hackathons, CTFs, technical workshops, and behind-the-scenes moments through an animated high-performance masonry media grid.",
 };
 
-export default function GalleryPage() {
+export default async function GalleryPage() {
+  const items = await fetchAllGalleryItems();
+
   return (
     <div className="min-h-screen bg-[#030712] text-slate-100 flex flex-col relative overflow-x-hidden selection:bg-cyber-blue selection:text-white font-sans">
       {/* Dynamic Cyber HUD Background with Parallax Nodes */}
@@ -35,7 +38,7 @@ export default function GalleryPage() {
 
       {/* Actual Gallery: Full-width outlier expanding to edge of screen */}
       <main className="relative z-10 flex-1 w-full pb-16 pt-6">
-        <GalleryContainer />
+        <GalleryContainer initialItems={items} />
       </main>
 
       {/* Footer */}

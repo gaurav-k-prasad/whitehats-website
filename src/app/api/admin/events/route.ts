@@ -1,9 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from 'next/server';
 import { getAdminSessionFromRequest } from '@/lib/auth';
 import { fetchAllEvents, getDb } from '@/lib/db';
 import * as schema from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { uploadBufferToCloudinary, deleteFromCloudinary } from '@/lib/cloudinary-server';
+import { revalidateTag, revalidatePath } from 'next/cache';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -97,7 +99,7 @@ export async function POST(request: Request) {
       const arrayBuffer = await imageFile.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
       const uploadResult = await uploadBufferToCloudinary(buffer, {
-        folder: 'whitehats/events',
+        folder: 'events',
         tags: ['whitehats', 'events', type],
       });
       imageUrl = uploadResult.publicId;
@@ -145,6 +147,12 @@ export async function POST(request: Request) {
         });
     }
 
+    try {
+      revalidateTag('events', { expire: 0 });
+      revalidatePath('/events');
+      revalidatePath('/api/events');
+    } catch {}
+
     return NextResponse.json({
       success: true,
       event: { id: eventId, title, type, date, imageUrl },
@@ -181,8 +189,31 @@ export async function DELETE(request: Request) {
 
     const db = getDb();
     if (db) {
+      // Find existing record to delete Cloudinary asset
+      const existing = await db
+        .select()
+        .from(schema.events)
+        .where(eq(schema.events.id, id))
+        .limit(1);
+
+      const eventToDelete = existing?.[0];
+      if (eventToDelete?.imageUrl) {
+        const isExternalOrData =
+          eventToDelete.imageUrl.startsWith('data:') ||
+          eventToDelete.imageUrl.startsWith('http');
+        if (!isExternalOrData) {
+          await deleteFromCloudinary(eventToDelete.imageUrl);
+        }
+      }
+
       await db.delete(schema.events).where(eq(schema.events.id, id));
     }
+
+    try {
+      revalidateTag('events', { expire: 0 });
+      revalidatePath('/events');
+      revalidatePath('/api/events');
+    } catch {}
 
     return NextResponse.json({ success: true });
   } catch (error) {

@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import { Plus, Edit2, Trash2, Shield, X, Save, AlertCircle } from "lucide-react";
 import CyberCardBorder from "@/components/ui/CyberCardBorder";
 import CipherReveal from "@/components/ui/CipherReveal";
-import MagneticButton from "@/components/ui/MagneticButton";
 import { BoardMember } from "@/data/boardData";
 import { CloudinaryImage } from "@/components/ui/cloudinary";
 import ImageUploadPicker from "@/components/admin/ImageUploadPicker";
@@ -192,6 +191,7 @@ export default function AdminBoardPage() {
                     src={member.imageUrl}
                     alt={member.name}
                     fill
+                    sizes="56px"
                     className="object-cover"
                   />
                 </div>
@@ -242,7 +242,7 @@ export default function AdminBoardPage() {
           onClick={(e) => {
             if (e.target === e.currentTarget) setEditingMember(null);
           }}
-          className="fixed inset-0 z-[99999] overflow-y-auto bg-black/85 backdrop-blur-md p-4 sm:p-6 md:p-8 flex justify-center items-start min-h-screen py-8 sm:py-12"
+          className="fixed inset-0 z-[1000] overflow-y-auto bg-black/85 backdrop-blur-md p-4 sm:p-6 md:p-8 flex justify-center items-start min-h-screen py-8 sm:py-12"
         >
           <div className="w-full max-w-lg my-auto">
             <CyberCardBorder contentClassName="p-6 flex flex-col gap-5">
@@ -309,7 +309,6 @@ export default function AdminBoardPage() {
                 {/* Direct Image Upload / Manual Input Component */}
                 <ImageUploadPicker
                   label="OPERATOR AVATAR"
-                  folderHint="whitehats/board"
                   value={editingMember.imageUrl}
                   onChangeValue={(val) =>
                     setEditingMember({ ...editingMember, imageUrl: val })

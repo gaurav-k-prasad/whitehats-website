@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import React, { useMemo, useState, useEffect } from "react";
 import TimelineEventCard from "./TimelineEventCard";
 import EventCard from "./EventCard";
-import { LayoutGrid, ListTree, Search, Sparkles, Terminal } from "lucide-react";
+import { LayoutGrid, ListTree, Search, Sparkles } from "lucide-react";
 
 type EventFilterType = "All" | "Hackathon" | "CTF" | "Workshop" | "Seminar" | "Bootcamp";
 type ViewMode = "timeline" | "grid";

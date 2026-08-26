@@ -75,7 +75,7 @@ export default function CustomCursor() {
   if (!isEnabled) return null;
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden select-none">
+    <div className="pointer-events-none fixed inset-0 z-999999 overflow-hidden select-none">
       {/* 1. Instant Inner Dot */}
       <motion.div
         style={{

@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import { Plus, Edit2, Trash2, Code, ExternalLink, X, Save, AlertCircle } from "lucide-react";
 import CyberCardBorder from "@/components/ui/CyberCardBorder";
 import CipherReveal from "@/components/ui/CipherReveal";
-import MagneticButton from "@/components/ui/MagneticButton";
 import NumberInput from "@/components/ui/NumberInput";
 import { ProjectRepository, ProjectStatus } from "@/data/projectsData";
 

@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import { Plus, Edit2, Trash2, Image as ImageIcon, X, Save, AlertCircle, Layers, UploadCloud } from "lucide-react";
 import CyberCardBorder from "@/components/ui/CyberCardBorder";
 import CipherReveal from "@/components/ui/CipherReveal";
-import MagneticButton from "@/components/ui/MagneticButton";
 import { CloudinaryImage } from "@/components/ui/cloudinary";
 import { GalleryItem } from "@/data/galleryData";
 import ImageUploadPicker from "@/components/admin/ImageUploadPicker";
@@ -285,6 +284,7 @@ export default function AdminGalleryPage() {
                   src={item.imageUrl}
                   alt={item.title}
                   fill
+                  sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 200px"
                   className="object-cover"
                 />
               </div>
@@ -331,7 +331,7 @@ export default function AdminGalleryPage() {
           onClick={(e) => {
             if (e.target === e.currentTarget) setEditingItem(null);
           }}
-          className="fixed inset-0 z-[99999] overflow-y-auto bg-black/85 backdrop-blur-md p-4 sm:p-6 md:p-8 flex justify-center items-start min-h-screen py-8 sm:py-12"
+          className="fixed inset-0 z-[1000] overflow-y-auto bg-black/85 backdrop-blur-md p-4 sm:p-6 md:p-8 flex justify-center items-start min-h-screen py-8 sm:py-12"
         >
           <div className="w-full max-w-xl my-auto">
             <CyberCardBorder contentClassName="p-6 flex flex-col gap-5">
@@ -443,14 +443,12 @@ export default function AdminGalleryPage() {
                   <ImageUploadPicker
                     multiple={true}
                     label="SELECT GALLERY PHOTOS (BULK)"
-                    folderHint="whitehats/gallery"
                     selectedFiles={selectedFiles}
                     onSelectFiles={setSelectedFiles}
                   />
                 ) : (
                   <ImageUploadPicker
                     label="GALLERY PHOTO"
-                    folderHint="whitehats/gallery"
                     value={editingItem.imageUrl}
                     onChangeValue={(val) =>
                       setEditingItem({ ...editingItem, imageUrl: val })

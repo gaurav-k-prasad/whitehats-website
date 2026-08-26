@@ -1,9 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from 'next/server';
 import { getAdminSessionFromRequest } from '@/lib/auth';
 import { fetchAllBoardMembers, getDb } from '@/lib/db';
 import * as schema from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { uploadBufferToCloudinary, deleteFromCloudinary } from '@/lib/cloudinary-server';
+import { revalidateTag, revalidatePath } from 'next/cache';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -75,7 +77,7 @@ export async function POST(request: Request) {
       const arrayBuffer = await imageFile.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
       const uploadResult = await uploadBufferToCloudinary(buffer, {
-        folder: 'whitehats/board',
+        folder: 'board',
         tags: ['whitehats', 'board', category],
       });
       imageUrl = uploadResult.publicId;
@@ -113,6 +115,13 @@ export async function POST(request: Request) {
         });
     }
 
+    try {
+      revalidateTag('board', { expire: 0 });
+      revalidateTag('board-members', { expire: 0 });
+      revalidatePath('/board');
+      revalidatePath('/api/board');
+    } catch {}
+
     return NextResponse.json({
       success: true,
       member: { id: memberId, name, role, category, imageUrl },
@@ -149,8 +158,32 @@ export async function DELETE(request: Request) {
 
     const db = getDb();
     if (db) {
+      // Find existing record to delete Cloudinary asset
+      const existing = await db
+        .select()
+        .from(schema.boardMembers)
+        .where(eq(schema.boardMembers.id, id))
+        .limit(1);
+
+      const memberToDelete = existing?.[0];
+      if (memberToDelete?.imageUrl) {
+        const isExternalOrData =
+          memberToDelete.imageUrl.startsWith('data:') ||
+          memberToDelete.imageUrl.startsWith('http');
+        if (!isExternalOrData) {
+          await deleteFromCloudinary(memberToDelete.imageUrl);
+        }
+      }
+
       await db.delete(schema.boardMembers).where(eq(schema.boardMembers.id, id));
     }
+
+    try {
+      revalidateTag('board', { expire: 0 });
+      revalidateTag('board-members', { expire: 0 });
+      revalidatePath('/board');
+      revalidatePath('/api/board');
+    } catch {}
 
     return NextResponse.json({ success: true });
   } catch (error) {

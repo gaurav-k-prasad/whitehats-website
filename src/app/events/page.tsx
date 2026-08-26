@@ -11,7 +11,11 @@ export const metadata = {
     "Explore upcoming and past cybersecurity events, CTFs, workshops, and hackathons conducted by WhiteHats Club.",
 };
 
-export default function EventsPage() {
+import { fetchAllEvents } from "@/lib/db";
+
+export default async function EventsPage() {
+  const events = await fetchAllEvents();
+
   return (
     <div className="min-h-screen bg-[#030712] text-slate-100 selection:bg-cyber-blue selection:text-black relative overflow-x-hidden font-sans">
       {/* Dynamic Cyber HUD Background with Parallax Nodes */}
@@ -21,7 +25,7 @@ export default function EventsPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col gap-10 lg:gap-12 pt-6 pb-12">
         <Navbar />
         <EventsHero />
-        <EventsTimeline />
+        <EventsTimeline events={events} />
         <Footer />
       </div>
     </div>

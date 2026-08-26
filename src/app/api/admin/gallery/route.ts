@@ -1,9 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from 'next/server';
 import { getAdminSessionFromRequest } from '@/lib/auth';
 import { fetchAllGalleryItems, getDb } from '@/lib/db';
 import * as schema from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { uploadBufferToCloudinary, deleteFromCloudinary, deleteMultipleFromCloudinary } from '@/lib/cloudinary-server';
+import { revalidateTag, revalidatePath } from 'next/cache';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -105,7 +107,7 @@ export async function POST(request: Request) {
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
         const result = await uploadBufferToCloudinary(buffer, {
-          folder: 'whitehats/gallery',
+          folder: 'gallery',
           tags: ['whitehats', 'gallery', category.toLowerCase()],
         });
         uploadedPublicIds.push(result.publicId);
@@ -133,6 +135,13 @@ export async function POST(request: Request) {
         }
       }
 
+      try {
+        revalidateTag('gallery', { expire: 0 });
+        revalidateTag('gallery-items', { expire: 0 });
+        revalidatePath('/gallery');
+        revalidatePath('/api/gallery');
+      } catch {}
+
       return NextResponse.json({
         success: true,
         count: newGalleryItems.length,
@@ -149,7 +158,7 @@ export async function POST(request: Request) {
       const arrayBuffer = await file.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
       const result = await uploadBufferToCloudinary(buffer, {
-        folder: 'whitehats/gallery',
+        folder: 'gallery',
         tags: ['whitehats', 'gallery', category.toLowerCase()],
       });
       finalImageUrl = result.publicId;
@@ -197,6 +206,13 @@ export async function POST(request: Request) {
         });
     }
 
+    try {
+      revalidateTag('gallery', { expire: 0 });
+      revalidateTag('gallery-items', { expire: 0 });
+      revalidatePath('/gallery');
+      revalidatePath('/api/gallery');
+    } catch {}
+
     return NextResponse.json({
       success: true,
       item: { id: itemId, title, category, imageUrl: finalImageUrl },
@@ -233,8 +249,32 @@ export async function DELETE(request: Request) {
 
     const db = getDb();
     if (db) {
+      // Find existing record to delete Cloudinary asset
+      const existing = await db
+        .select()
+        .from(schema.galleryItems)
+        .where(eq(schema.galleryItems.id, id))
+        .limit(1);
+
+      const itemToDelete = existing?.[0];
+      if (itemToDelete?.imageUrl) {
+        const isExternalOrData =
+          itemToDelete.imageUrl.startsWith('data:') ||
+          itemToDelete.imageUrl.startsWith('http');
+        if (!isExternalOrData) {
+          await deleteFromCloudinary(itemToDelete.imageUrl);
+        }
+      }
+
       await db.delete(schema.galleryItems).where(eq(schema.galleryItems.id, id));
     }
+
+    try {
+      revalidateTag('gallery', { expire: 0 });
+      revalidateTag('gallery-items', { expire: 0 });
+      revalidatePath('/gallery');
+      revalidatePath('/api/gallery');
+    } catch {}
 
     return NextResponse.json({ success: true });
   } catch (error) {

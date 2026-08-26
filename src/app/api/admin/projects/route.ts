@@ -3,6 +3,7 @@ import { getAdminSessionFromRequest } from '@/lib/auth';
 import { fetchAllProjects, getDb } from '@/lib/db';
 import * as schema from '@/db/schema';
 import { eq } from 'drizzle-orm';
+import { revalidateTag, revalidatePath } from 'next/cache';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -73,6 +74,12 @@ export async function POST(request: Request) {
         });
     }
 
+    try {
+      revalidateTag('projects', { expire: 0 });
+      revalidatePath('/projects');
+      revalidatePath('/api/projects');
+    } catch {}
+
     return NextResponse.json({ success: true, project: { id: projectId, name, status } });
   } catch (error) {
     console.error('Save project error:', error);
@@ -98,6 +105,12 @@ export async function DELETE(request: Request) {
     if (db) {
       await db.delete(schema.projects).where(eq(schema.projects.id, id));
     }
+
+    try {
+      revalidateTag('projects', { expire: 0 });
+      revalidatePath('/projects');
+      revalidatePath('/api/projects');
+    } catch {}
 
     return NextResponse.json({ success: true, message: `Project ${id} removed` });
   } catch (error) {

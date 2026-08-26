@@ -101,10 +101,6 @@ export default function LightboxModal({
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#0B1120]/90 via-transparent to-transparent pointer-events-none" />
 
-                  <div className="absolute bottom-3 left-3 font-mono text-[10px] text-slate-300 bg-[#030712]/90 backdrop-blur-xs px-2.5 py-1 rounded border border-[#1E293B] flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-cyber-blue animate-pulse" />
-                    <span>SECURE INTEL ARCHIVE // RECORD #{selectedItem.id}</span>
-                  </div>
                 </motion.div>
               </div>
 

@@ -7,10 +7,11 @@ import { GalleryItem } from "@/data/galleryData";
 
 interface GalleryCardProps {
   item: GalleryItem;
+  priority?: boolean;
   onSelect: (item: GalleryItem) => void;
 }
 
-export default function GalleryCard({ item, onSelect }: GalleryCardProps) {
+export default function GalleryCard({ item, priority = false, onSelect }: GalleryCardProps) {
   const [imageError, setImageError] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -54,7 +55,8 @@ export default function GalleryCard({ item, onSelect }: GalleryCardProps) {
             src={item.imageUrl}
             alt={item.title}
             fill
-            loading="lazy"
+            priority={priority}
+            loading={priority ? "eager" : "lazy"}
             sizes="(max-width: 640px) 350px, (max-width: 1024px) 500px, 600px"
             className={`object-cover transition-opacity duration-300 ${
               isLoaded ? "opacity-95 group-hover:opacity-100" : "opacity-0"

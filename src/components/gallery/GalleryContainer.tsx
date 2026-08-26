@@ -6,9 +6,13 @@ import GalleryFilters from "./GalleryFilters";
 import HorizontalMasonry from "./HorizontalMasonry";
 import LightboxModal from "./LightboxModal";
 
-export default function GalleryContainer() {
-  const [items, setItems] = useState<GalleryItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+interface GalleryContainerProps {
+  initialItems?: GalleryItem[];
+}
+
+export default function GalleryContainer({ initialItems }: GalleryContainerProps) {
+  const [items, setItems] = useState<GalleryItem[]>(initialItems || []);
+  const [isLoading, setIsLoading] = useState(!initialItems);
   const [filterState, setFilterState] = useState<GalleryFilterState>({
     category: "ALL",
     searchQuery: "",
@@ -17,18 +21,20 @@ export default function GalleryContainer() {
   const [selectedItem, setSelectedItem] = useState<GalleryItem | null>(null);
 
   useEffect(() => {
-    fetch("/api/gallery")
-      .then((res) => res.json())
-      .then((data) => {
-        setItems(data.items || []);
-      })
-      .catch(() => {
-        setItems([]);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, []);
+    if (!initialItems) {
+      fetch("/api/gallery")
+        .then((res) => res.json())
+        .then((data) => {
+          setItems(data.items || []);
+        })
+        .catch(() => {
+          setItems([]);
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    }
+  }, [initialItems]);
 
   // Filter items based on active category and search query
   const filteredItems = useMemo(() => {

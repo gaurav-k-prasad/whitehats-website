@@ -59,10 +59,13 @@ export function getDb() {
   return null;
 }
 
+import { unstable_cache } from 'next/cache';
+
 /**
- * Database fetchers: return database records; fallback to static data if unavailable.
+ * Database fetchers: cached via Next.js built-in Data Cache with tag-based revalidation.
+ * Fallback to static data if database is unpopulated or unavailable.
  */
-export async function fetchAllBoardMembers(): Promise<BoardMember[]> {
+async function queryBoardMembers(): Promise<BoardMember[]> {
   const db = getDb();
   if (db) {
     try {
@@ -77,7 +80,13 @@ export async function fetchAllBoardMembers(): Promise<BoardMember[]> {
   return BOARD_DATA;
 }
 
-export async function fetchAllEvents(): Promise<ClubEvent[]> {
+export const fetchAllBoardMembers = unstable_cache(
+  queryBoardMembers,
+  ['whitehats-board-members'],
+  { tags: ['board', 'board-members'], revalidate: 3600 }
+);
+
+async function queryEvents(): Promise<ClubEvent[]> {
   const db = getDb();
   if (db) {
     try {
@@ -92,7 +101,13 @@ export async function fetchAllEvents(): Promise<ClubEvent[]> {
   return sortEventsDescending(EVENTS_DATA);
 }
 
-export async function fetchAllGalleryItems(): Promise<GalleryItem[]> {
+export const fetchAllEvents = unstable_cache(
+  queryEvents,
+  ['whitehats-events'],
+  { tags: ['events'], revalidate: 3600 }
+);
+
+async function queryGalleryItems(): Promise<GalleryItem[]> {
   const db = getDb();
   if (db) {
     try {
@@ -107,7 +122,13 @@ export async function fetchAllGalleryItems(): Promise<GalleryItem[]> {
   return GALLERY_ITEMS;
 }
 
-export async function fetchAllProjects(): Promise<ProjectRepository[]> {
+export const fetchAllGalleryItems = unstable_cache(
+  queryGalleryItems,
+  ['whitehats-gallery-items'],
+  { tags: ['gallery', 'gallery-items'], revalidate: 3600 }
+);
+
+async function queryProjects(): Promise<ProjectRepository[]> {
   const db = getDb();
   if (db) {
     try {
@@ -122,7 +143,13 @@ export async function fetchAllProjects(): Promise<ProjectRepository[]> {
   return PROJECTS_DATA;
 }
 
-export async function fetchAllClubStats(): Promise<AboutStat[]> {
+export const fetchAllProjects = unstable_cache(
+  queryProjects,
+  ['whitehats-projects'],
+  { tags: ['projects'], revalidate: 3600 }
+);
+
+async function queryClubStats(): Promise<AboutStat[]> {
   const db = getDb();
   if (db) {
     try {
@@ -136,3 +163,9 @@ export async function fetchAllClubStats(): Promise<AboutStat[]> {
   }
   return ABOUT_STATS;
 }
+
+export const fetchAllClubStats = unstable_cache(
+  queryClubStats,
+  ['whitehats-club-stats'],
+  { tags: ['stats', 'club-stats'], revalidate: 3600 }
+);

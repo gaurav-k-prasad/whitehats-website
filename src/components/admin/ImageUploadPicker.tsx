@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { UploadCloud, Image as ImageIcon, X, Link as LinkIcon, RefreshCw, CheckCircle2 } from "lucide-react";
+import Image from "next/image";
 import { CloudinaryImage } from "@/components/ui/cloudinary";
 
 export interface SelectedFileItem {
@@ -18,7 +19,6 @@ interface SingleImageUploadPickerProps {
   selectedFile?: File | null;
   onSelectFile: (file: File | null) => void;
   label?: string;
-  folderHint?: string;
   className?: string;
 }
 
@@ -27,7 +27,6 @@ interface MultipleImageUploadPickerProps {
   selectedFiles: File[];
   onSelectFiles: (files: File[]) => void;
   label?: string;
-  folderHint?: string;
   className?: string;
 }
 
@@ -46,41 +45,46 @@ export default function ImageUploadPicker(props: ImageUploadPickerProps) {
   const [isDragOver, setIsDragOver] = useState(false);
   const [showManualInput, setShowManualInput] = useState(false);
 
-  // Single file preview state
-  const [singlePreview, setSinglePreview] = useState<string | null>(null);
+  const selectedFile = !props.multiple ? props.selectedFile : undefined;
+  const selectedFiles = props.multiple ? props.selectedFiles : undefined;
 
-  // Multiple files preview state
-  const [multiPreviews, setMultiPreviews] = useState<SelectedFileItem[]>([]);
-
-  // Manage single file object URL
-  useEffect(() => {
-    if (!props.multiple && props.selectedFile) {
-      const url = URL.createObjectURL(props.selectedFile);
-      setSinglePreview(url);
-      return () => {
-        URL.revokeObjectURL(url);
-      };
-    } else if (!props.multiple && !props.selectedFile) {
-      setSinglePreview(null);
+  // Single file preview memoization
+  const singlePreview = useMemo(() => {
+    if (selectedFile) {
+      return URL.createObjectURL(selectedFile);
     }
-  }, [props.multiple, !props.multiple ? props.selectedFile : null]);
+    return null;
+  }, [selectedFile]);
 
-  // Manage multiple file object URLs
-  useEffect(() => {
-    if (props.multiple && props.selectedFiles) {
-      const items: SelectedFileItem[] = props.selectedFiles.map((file) => ({
+  // Multiple files preview memoization
+  const multiPreviews = useMemo(() => {
+    if (selectedFiles) {
+      return selectedFiles.map((file) => ({
         file,
         previewUrl: URL.createObjectURL(file),
         name: file.name,
         sizeFormatted: formatFileSize(file.size),
       }));
-      setMultiPreviews(items);
-
-      return () => {
-        items.forEach((item) => URL.revokeObjectURL(item.previewUrl));
-      };
     }
-  }, [props.multiple, props.multiple ? props.selectedFiles : null]);
+    return [] as SelectedFileItem[];
+  }, [selectedFiles]);
+
+  // Cleanup preview object URLs when previews change or unmount
+  useEffect(() => {
+    return () => {
+      if (singlePreview) {
+        URL.revokeObjectURL(singlePreview);
+      }
+    };
+  }, [singlePreview]);
+
+  useEffect(() => {
+    return () => {
+      multiPreviews.forEach((item) => {
+        URL.revokeObjectURL(item.previewUrl);
+      });
+    };
+  }, [multiPreviews]);
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -149,11 +153,6 @@ export default function ImageUploadPicker(props: ImageUploadPickerProps) {
         <label className="text-xs font-mono font-medium text-slate-300 flex items-center gap-1.5 whitespace-nowrap">
           <ImageIcon className="w-3.5 h-3.5 text-cyber-blue shrink-0" />
           <span>{props.label || "IMAGE UPLOAD"}</span>
-          {props.folderHint && (
-            <span className="text-[10px] text-slate-500 font-mono hidden xs:inline sm:inline">
-              ({props.folderHint})
-            </span>
-          )}
         </label>
 
         {!props.multiple && (
@@ -229,10 +228,13 @@ export default function ImageUploadPicker(props: ImageUploadPickerProps) {
                     key={idx}
                     className="relative group rounded-md overflow-hidden border border-[#1E293B] bg-[#070D1D] aspect-[4/3]"
                   >
-                    <img
+                    <Image
                       src={item.previewUrl}
                       alt={item.name}
-                      className="w-full h-full object-cover"
+                      fill
+                      sizes="(max-width: 640px) 50vw, 25vw"
+                      className="object-cover"
+                      unoptimized
                     />
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-1.5">
                       <button
@@ -280,6 +282,7 @@ export default function ImageUploadPicker(props: ImageUploadPickerProps) {
                   src={props.value}
                   alt="Remote Preview"
                   fill
+                  sizes="56px"
                   className="object-cover"
                 />
               </div>
@@ -302,10 +305,13 @@ export default function ImageUploadPicker(props: ImageUploadPickerProps) {
             <div className="p-3 rounded-lg bg-[#030712] border border-cyber-blue/40 flex items-center justify-between gap-3 shadow-[0_0_15px_rgba(0,136,255,0.15)]">
               <div className="flex items-center gap-3 min-w-0">
                 <div className="relative w-14 h-14 rounded overflow-hidden bg-[#070D1D] shrink-0 border border-[#1E293B]">
-                  <img
+                  <Image
                     src={singlePreview}
                     alt="Selected Preview"
-                    className="w-full h-full object-cover"
+                    fill
+                    sizes="56px"
+                    className="object-cover"
+                    unoptimized
                   />
                 </div>
                 <div className="font-mono text-xs text-slate-300 min-w-0 flex flex-col gap-0.5">
@@ -351,6 +357,7 @@ export default function ImageUploadPicker(props: ImageUploadPickerProps) {
                     src={props.value}
                     alt="Current Image"
                     fill
+                    sizes="56px"
                     className="object-cover"
                   />
                 </div>
