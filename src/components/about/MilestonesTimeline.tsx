@@ -21,7 +21,7 @@ export default function MilestonesTimeline() {
 
         {ABOUT_MILESTONES.map((milestone, idx) => (
           <motion.div
-            key={milestone.year}
+            key={`${milestone.year}-${milestone.title}`}
             initial={{ opacity: 0, x: -16 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: "-60px" }}

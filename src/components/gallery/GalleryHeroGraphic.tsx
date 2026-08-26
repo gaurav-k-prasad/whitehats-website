@@ -2,6 +2,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
+import { GALLERY_ITEMS } from "@/data/galleryData";
 
 export default function GalleryHeroGraphic() {
   return (
@@ -54,7 +55,7 @@ export default function GalleryHeroGraphic() {
         {/* Telemetry Stream */}
         <div className="grid grid-cols-3 gap-2 text-center text-[10px]">
           <div className="p-2 rounded bg-[#030712] border border-[#1E293B] flex flex-col gap-0.5">
-            <span className="text-white font-bold text-xs">100+</span>
+            <span className="text-white font-bold text-xs">{GALLERY_ITEMS.length}</span>
             <span className="text-slate-500">FRAMES</span>
           </div>
           <div className="p-2 rounded bg-[#030712] border border-[#1E293B] flex flex-col gap-0.5">

@@ -32,9 +32,8 @@ export default function GalleryContainer() {
         const matchesCategory = item.category.toLowerCase().includes(query);
         const matchesTags = item.tags.some((t) => t.toLowerCase().includes(query));
         const matchesYear = item.year.includes(query);
-        const matchesDesc = item.description?.toLowerCase().includes(query) ?? false;
 
-        return matchesTitle || matchesCategory || matchesTags || matchesYear || matchesDesc;
+        return matchesTitle || matchesCategory || matchesTags || matchesYear;
       }
 
       return true;

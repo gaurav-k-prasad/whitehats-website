@@ -38,7 +38,7 @@ export const ABOUT_MISSION = {
 };
 
 export const ABOUT_STATS: AboutStat[] = [
-  { label: "Active Members", value: "50+" },
+  { label: "Active Members", value: "800+" },
   { label: "Events Conducted", value: "10+" },
   { label: "Open-Source Tools", value: "4+" },
   { label: "Founded", value: "2024" },
@@ -78,7 +78,7 @@ export const ABOUT_VALUES: AboutValue[] = [
 // TODO: replace with the club's actual timeline / key milestones
 export const ABOUT_MILESTONES: AboutMilestone[] = [
   {
-    year: "2024",
+    year: "2025",
     title: "WhiteHats Founded",
     description: "A small group of students at VIT Vellore forms the club around a shared obsession with offensive security.",
   },
